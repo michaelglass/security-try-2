@@ -1,0 +1,11 @@
+main
+tests
+test_dir/*
+objget
+objput
+objlist
+objgetacl
+objsetacl
+objtestacl
+*.o
+objectstore/*
