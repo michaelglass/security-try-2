@@ -1,15 +1,14 @@
 #ifndef MGG2102_SECURITY_OBJECT_H
 #define MGG2102_SECURITY_OBJECT_H
+
 #include <memory>
 #include <iostream>
-#include <exception>
+// #include <exception>
 
 
 namespace object_store
 {
   using namespace std;
-  
-  
   
   class Object
   {
@@ -49,7 +48,7 @@ namespace object_store
       @return a new object_store
     */
     Object(const string& name, const string& path = "") throw(ObjectException);//throw(ObjectException);
-        
+    
     /**
       getter for obj's name
     */
@@ -64,7 +63,7 @@ namespace object_store
       @return whether object is saved
     */
     bool exists() const;
-    
+        
     /**
       used to output object's contents into an ostream
     */

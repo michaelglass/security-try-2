@@ -117,6 +117,7 @@ namespace object_store
     obj.close();
     return is;
   }
+  
 
 
   bool Object::exists() const
@@ -132,4 +133,5 @@ namespace object_store
 
   string Object::path() const
   {  return *_path + (_path->length() == 0 ? "" : "/" ) + *_name;  }
+  
 }

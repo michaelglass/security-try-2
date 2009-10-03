@@ -3,7 +3,7 @@ CXX=		g++
 CFLAGS=		#-g -Wall -O2 -m64
 CXXFLAGS=	$(CFLAGS)
 DFLAGS=		
-OBJS=	 object.o
+OBJS=	 object.o user.o
 PROGS=		tests
 INCLUDES=	
 LIBS=
@@ -22,6 +22,7 @@ tests: $(OBJS) tests.o
 	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) tests.o -o $@ $(LIBS)
 	
 object.o:object.h
+user.o:user.h
   
 clean:
 	rm -f *.o a.out $(PROGS) *~ *.a
