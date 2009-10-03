@@ -44,11 +44,19 @@ void object_tests()
     }
     test("an invalid name causes an error to be thrown", exeption_thrown);
 
-    obj = new Object(valid_name);
+    obj = new Object(valid_name, valid_path);
     
-    stringstream asdf("MONKEY NOISES!");
-    asdf >> *obj;
-    cout << *obj;
+    string the_right_result = "test string";
+    stringstream my_in(the_right_result), my_out;
+    
+    my_in >> *obj;
+    my_out << *obj;
+    test("when I input and output file contents to my object the results are the same", my_in.str() == my_out.str());
+    
+    //now that I've created my obj, it should exist.
+    
+    test("now object should exist that we've written to it", obj->exists());
+    delete obj;
 }
 
 
