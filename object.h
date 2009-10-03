@@ -5,15 +5,19 @@
 #include <iostream>
 // #include <exception>
 
-
 namespace object_store
 {
   using namespace std;
   
   class Object
   {
+  protected:
     auto_ptr<string> _name;
     auto_ptr<string> _path;
+    
+    virtual ostream& write(ostream& os);
+    virtual istream& read(istream& is);
+    
   public:
     class ObjectException : public exception 
     {
@@ -32,7 +36,7 @@ namespace object_store
       can only contains letters, digits, periods, underscores, @s and ^s.  Cannot be named . or ..
     */
     static bool valid_name(const string& name);
-
+    
     /**
       path has to be a pre-existing directory.  it can also have no two periods in a row and no initial / (must be relative path ).
     */
@@ -50,6 +54,12 @@ namespace object_store
     Object(const string& name, const string& path = "") throw(ObjectException);//throw(ObjectException);
     
     /**
+      copy constructor
+    */
+    Object(Object &o);
+    
+    
+    /**
       getter for obj's name
     */
     string name() const;
@@ -63,7 +73,7 @@ namespace object_store
       @return whether object is saved
     */
     bool exists() const;
-        
+            
     /**
       used to output object's contents into an ostream
     */

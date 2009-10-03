@@ -4,9 +4,9 @@
 
 namespace object_store
 {
-  auto_ptr<Object> User::userobj(new Object("userfile", "objectstore"));
+  auto_ptr<Object> User::userobj(new Object("userfile", OBJECTSTORE_PATH));
   
-  User::UserException::UserException(const string& username, bool doesnt_exist) throw() : _username(new string(username)), _doesnt_exist(doesnt_exist)
+  User::UserException::UserException(const string& user_name, bool doesnt_exist) throw() : _user_name(new string(user_name)), _doesnt_exist(doesnt_exist)
   {}
   User::UserException::~UserException() throw()
   {}
@@ -14,11 +14,32 @@ namespace object_store
   {
     string err_str = "UserException: ";
     if(_doesnt_exist)
-      err_str += " User with username \""+ *_username +"\" doesn't exist";
+      err_str += " User with user_name \""+ *_user_name +"\" doesn't exist";
     else
-      err_str += " username \""+ *_username +"\" is invalid.  Usernames must be less than 255 chars and can only contain letters, numbers, underscores, and periods.";
+      err_str += " user_name \""+ *_user_name +"\" is invalid.  Usernames must be less than 254 chars and can only contain letters, numbers, underscores, and periods.";
       
     return err_str.c_str();
+  }
+  
+  const vector<const User*>* User::users()
+  {
+    vector<const User*>* rval = new vector<const User*>();
+    stringstream user_str;
+    user_str << *User::userobj;
+    
+    string line;
+    while(user_str.good())
+    {
+      getline(user_str, line);
+      istringstream line_parser(line);
+      if(line_parser.good())
+      {
+        string username;
+        line_parser >> username;
+        rval->push_back(new User(username));
+      }
+    }
+    return rval;
   }
   
   bool User::set_userobj(Object* obj)
@@ -59,29 +80,33 @@ namespace object_store
   
   
   
-  bool User::valid_name(const string& username)
+  bool User::valid_name(const string& user_name)
   {
-    string::const_iterator it;
-  
-    for ( it = username.begin() ; it < username.end(); it++ )
+    bool pass = Object::valid_name(user_name); //is a valid file?  (this is slow)
+    if(pass)
     {
-      if(!( (*it >= 'a' && *it <= 'z') || //lower case?
-            (*it >= 'A' && *it <= 'Z') || //upper case?
-            (*it >= '0' && *it <= '9') || //numeral?
-            *it == '.' || //period or
-            *it == '_') ) //underscore?
-        return false; //if not, return false. 
+      string::const_iterator it;
+  
+      for ( it = user_name.begin() ; it < user_name.end(); it++ )
+      {
+        if(!( (*it >= 'a' && *it <= 'z') || //lower case?
+              (*it >= 'A' && *it <= 'Z') || //upper case?
+              (*it >= '0' && *it <= '9') || //numeral?
+              *it == '.' || //period or
+              *it == '_') ) //underscore?
+          return false; //if not, return false. 
+      }
     }
-    return Object::valid_name(username); // I know this is slow
+    return pass; 
   }
   
-  User::User(const string& username) throw (UserException) : _username(new string(username)), _groups(new vector<const string*>)
+  User::User(const string& user_name) throw (UserException) : _user_name(new string(user_name)), _groups(new vector<const string*>)
   {
     bool fail = true;
     
-    if(!valid_name(username))
+    if(!valid_name(user_name))
     {
-      UserException ue(username, false);
+      UserException ue(user_name, false);
       throw ue;
     }
     
@@ -100,7 +125,7 @@ namespace object_store
       {
         istringstream line_parser(line);
         line_parser >> user;
-        if(user == username)
+        if(user == user_name)
         {
           fail = false;
           while(line_parser.good())
@@ -115,14 +140,14 @@ namespace object_store
     
     if(fail)
     {
-      UserException ue(username, true);
+      UserException ue(user_name, true);
       throw ue;
     }      
   }
   
   string User::name() const
   {
-    return *_username;
+    return *_user_name;
   }
   
   

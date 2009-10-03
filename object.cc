@@ -29,7 +29,7 @@ namespace object_store
   bool Object::valid_name(const string& name)
   {
     size_t min_length = 1;
-    size_t max_length = FILENAME_MAX < 255 ? FILENAME_MAX : 255;
+    size_t max_length = (FILENAME_MAX < 255 ? FILENAME_MAX : 255) -1; //filename + 1-char prefix
   
     size_t length = name.length();
     if(length < min_length || length > max_length || name == "." || name == "..") //too short, too long, "." or ".."
@@ -44,13 +44,18 @@ namespace object_store
             (*it >= '0' && *it <= '9') || //numeral?
             *it == '.' || //period or
             *it == '_' || //underscore?
-            *it == '@' || //@ sign
-            *it == '^' ) ) // or ^
+            *it == '@' ||
+            *it == '=' ||
+            *it == '+' ||
+            *it == '{' ||
+            *it == '}' ||
+            *it == '[' ||
+            *it == ']') ) //@ sign
         return false; //if not, return false. 
     }
     return true; // GREAT SUCCESS!
   }
-
+  
   bool Object::valid_path(const string& path)
   {
     if(path.length() > 1) //if it's not empty...
@@ -67,7 +72,7 @@ namespace object_store
   //ObjectException
   Object::Object(const string& name, const string& path) throw(ObjectException) : _name(new string(name)), _path(new string(path))
   {
-    bool valid_name = Object::valid_name(name);
+    bool valid_name = this->valid_name(name);
     bool valid_path = Object::valid_path(path);
   
     if(!valid_name || !valid_path) //FAIL!
@@ -76,33 +81,37 @@ namespace object_store
       throw oe;
     }
   }
+  
+  Object::Object(Object &o) : _name(new string(*o._name)), _path(new string(*o._path))
+  {}
+  
 
-  ostream& operator<< (std::ostream& os, Object& object)
+  ostream& Object::write(ostream& os)
   {
-    if(object.exists())
-    {
-      ifstream obj;
-      obj.open( object.path().c_str() );
-      if(obj.is_open())
-      {
-        char buff[4096]; //arbitrary 4k buffer
-        streamsize size;
-        while(obj.good())
-        {
-          obj.read(buff, 4096);
-          size = obj.gcount();
-          os.write(buff, size);
-        }  
-      }
-      obj.close();
-    }
-    return os;
+    if(exists())
+     {
+       ifstream obj;
+       obj.open( path().c_str() );
+       if(obj.is_open())
+       {
+         char buff[4096]; //arbitrary 4k buffer
+         streamsize size;
+         while(obj.good())
+         {
+           obj.read(buff, 4096);
+           size = obj.gcount();
+           os.write(buff, size);
+         }  
+       }
+       obj.close();
+     }
+     return os;
   }
-
-  istream& operator>> (std::istream& is, Object& object)
+  
+  istream& Object::read(istream& is)
   {
     ofstream obj;
-    obj.open( object.path().c_str() );
+    obj.open( path().c_str() );
     if(obj.is_open())
     {
       char buff[4096];
@@ -116,9 +125,23 @@ namespace object_store
     }
     obj.close();
     return is;
+    
   }
+
   
 
+  ostream& operator<< (std::ostream& os, Object& object)
+  {
+    return object.write(os);
+  }
+
+  
+
+  istream& operator>> (std::istream& is, Object& object)
+  {
+    return object.read(is);
+  }
+  
 
   bool Object::exists() const
   {
@@ -132,6 +155,6 @@ namespace object_store
   {  return *_name;  }
 
   string Object::path() const
-  {  return *_path + (_path->length() == 0 ? "" : "/" ) + *_name;  }
+  {  return *_path + (_path->length() == 0 ? "" : "/" ) + "%" + *_name;  }
   
 }
