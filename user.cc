@@ -154,6 +154,13 @@ namespace object_store
     }      
   }
   
+  User::~User()
+  {
+    vector<const string*>::iterator it;
+    for(it = _groups->begin(); it < _groups->end(); it++)
+      delete *it;
+  }
+  
   string User::name() const
   {
     return *_user_name;

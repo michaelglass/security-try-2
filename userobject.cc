@@ -4,7 +4,8 @@
 #include "object.h"
 #include <sys/types.h> //needed for various directory methods
 #include <sys/stat.h> //needed for various directory methods.
-
+#include <dirent.h>
+#include <errno.h>
 #include <string>
 
 namespace object_store
@@ -47,7 +48,7 @@ namespace object_store
   bool UserObject::make_homedirs()
   {
     bool success = true;
-    const vector<const User*>* users = User::users();
+    auto_ptr<const vector<const User*> > users(User::users());
     
     vector<const User*>::const_iterator it;
     struct stat s;
@@ -55,13 +56,11 @@ namespace object_store
     for(it = users->begin(); it < users->end(); it++)
     {
       const char* path = UserObject::path((*it)->name()).c_str();
-     
+      delete *it;
       //check to see if the object storedirectory exists
       if(stat(path, &s) != 0)
         if(mkdir(path, S_IRWXU) != 0)
           success = false;
-        
-        
     }
     
     return success;
@@ -82,6 +81,35 @@ namespace object_store
   {
     return new UserObject(*this);
   }
+  
+  vector<UserObject*>* UserObject::objects(const string& user_name) throw(User::UserException)
+  {
+    User u(user_name); //throws error if there's an issue
+    string path(UserObject::path(user_name));
+    
+    vector<UserObject*>* rval = new vector<UserObject*>();
+ 
+    DIR *dp;
+    struct dirent *dirp;
+    if((dp  = opendir(path.c_str())) == NULL) {
+      cerr << "Error(" << errno << ") opening " << path << endl;
+      return 0;
+    }
+
+    while ((dirp = readdir(dp)) != NULL)
+    {
+      string objname(dirp->d_name);
+      if(objname == "." || objname == "..")
+        continue;
+      else
+        objname = objname.substr(1); //first char is prefix
+      rval->push_back(new UserObject(user_name, objname));
+    }
+
+    closedir(dp);
+    return rval;    
+  }
+  
   
  
 }

@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 // #include "object.h"
 #include "user.h"
 #include "userobject.h"
@@ -32,7 +33,10 @@ namespace object_store
     
     virtual istream& read(istream& is) throw();
   public:
-    
+    /**
+      returns a list of objs for that user
+    */
+    static vector<UserObject*>* objects(const string& user_name) throw(User::UserException);
     
     class ACLObjectException : public exception 
      {

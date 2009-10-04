@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 // #include "object.h"
 #include "user.h"
 #include "object.h"
@@ -21,6 +22,10 @@ namespace object_store
     static string path(const string& user_name);
     
   public:
+    /**
+      returns a list of objs for that user
+    */
+    static vector<UserObject*>* objects(const string& user_name) throw(User::UserException);
     static bool valid_name(const string& name);
     
     class UserObjectException : public exception 

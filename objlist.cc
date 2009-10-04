@@ -1,10 +1,11 @@
+#include "objectstore.h"
 #include <iostream>
 #include <string>
 
-#define USAGE_STRING  "Usage: objlist -u username -g groupname [-l]\n" \
+#define USAGE_STRING  "Usage: objlist -u username [-l]\n" \
                       "  username        the username whose available objects are being listed.\n" \
-                      "  groupname       the groupname of the username whose available objects are being listed.\n" \
                       "  -l              list all metadata associated with each object\n"
+
 
 int usage(const std::string& usage_string)
 {
@@ -15,13 +16,12 @@ int usage(const std::string& usage_string)
 int main(int argc, char* argv[])
 {
   using namespace std;
-  
+  using namespace object_store;
 	int c;
   string username;
-  string groupname;
 	bool show_metadata_flag = false;
 	
-	while((c = getopt(argc, argv, "u:g:l")) != -1)
+	while((c = getopt(argc, argv, "u:l")) != -1)
 		switch(c)
 		{
 			case 'l':
@@ -30,16 +30,31 @@ int main(int argc, char* argv[])
 			case 'u':
 				username = optarg;
 				break;
-			case 'g':
-        groupname = optarg;
-        break;
 			default:
         return usage(USAGE_STRING);
 		}
-	if(username.length() == 0 || groupname.length() == 0)
+	if(username.length() == 0)
     return usage(USAGE_STRING);
     
-  cout << "username: " << username << "\n"
-      << "groupname: " << groupname << "\n"
-      << (show_metadata_flag ? "" : "not ")  << "showing metadata\n";
+  try{
+    auto_ptr< vector<UserObject*> > objs(ACLObject::objects(username));
+    vector<UserObject*>::iterator it;
+    
+    for(it = objs->begin(); it < objs->end(); it++)
+    {
+      UserObject* obj = *it;
+      
+      cout << obj->name();
+      if(show_metadata_flag)
+        cout << "......." << obj->length() << " bytes";
+      cout << endl;
+      delete obj;
+    }
+  }
+  catch(exception& e)
+  {
+    cerr << USAGE_STRING << endl << e.what() << endl;
+    return 2;
+  }
+    
 }

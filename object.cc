@@ -155,6 +155,19 @@ namespace object_store
     return (  stat(path().c_str(), &s) == 0 &&      //path has to exist
                 S_ISREG(s.st_mode) );               //and has to be a dir
   }
+  
+  unsigned long Object::length() const
+  {
+    if(!exists())
+      return 0;
+    unsigned long length;
+    ifstream obj;
+    obj.open( path().c_str() );
+    obj.seekg (0, ios::end);
+    length = obj.tellg();
+    obj.close();
+    return length;
+  }
 
   string Object::name() const
   {  return *_name;  }

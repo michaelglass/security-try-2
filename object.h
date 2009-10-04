@@ -74,6 +74,12 @@ namespace object_store
       @return whether object is saved
     */
     bool exists() const;
+    
+    /**
+      gets the length of objects that exist.  returns 0 if they dont
+      @return the size of the object
+    */
+    unsigned long length() const;
             
     /**
       used to output object's contents into an ostream

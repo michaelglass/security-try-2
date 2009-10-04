@@ -16,7 +16,7 @@ namespace object_store
       return ("ACLObjectException: Object name \"" + *_group + "\" is not valid.  Object names must be less than 254 chars and can only contain letters, numbers, underscores, and periods.").c_str();
     }
     if(_file_not_there)
-      return "ACLObjectException: File does not yet exist.  Can't access other users files that they haven't created";
+      return "ACLObjectException: Object does not yet exist.  Can't access other users objects that they haven't created";
     
     return ("ACLObjectException: Groupname \""+*_group+"\" " + 
                               (_user->length() > 0 ? 
@@ -159,6 +159,23 @@ namespace object_store
       default_permissions >> *_acl_object;
     }
     return PermissionsObject::read(is);
+  }
+  
+  vector<UserObject*>* ACLObject::objects(const string& user_name) throw(User::UserException)
+  {
+    vector<UserObject*>* rval = UserObject::objects(user_name);
+    vector<UserObject*>::iterator it;
+    for(it = rval->begin(); it < rval->end(); it++)
+    {
+      UserObject* obj = *it;
+      string objname = obj->name();
+      if(objname[objname.length()-1] == '@')
+      {
+        delete *it;
+        rval->erase(it);
+      }
+    }
+    return rval;
   }
   
 }

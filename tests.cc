@@ -2,6 +2,11 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <vector>
+#include <dirent.h>
+#include <errno.h>
+#include <string>
+
 #define LINE_LENGTH 150
 
 using namespace std;
