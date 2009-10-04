@@ -30,9 +30,13 @@ int main(int argc, char* argv[])
     if(obj->exists())
       cout << *obj;
     else
+    {
       cerr << USAGE_STRING << endl << "object doesnt exist" << endl;
+      return 2;
+    }
   }
   catch(exception& e){
     cerr << USAGE_STRING << endl << e.what() << endl;
+    return 3;
   }
 }

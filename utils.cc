@@ -9,7 +9,7 @@ namespace utils
 {
   using namespace std;
   
-  int get_params(int argc, char *argv[], const string& usage_string, string& username, string& groupname, string& ownername, string& objname)
+  int get_params(int argc, char *argv[], const string& usage_string, string& username, string& groupname, string& objname, string& ownername, bool get_last_arg)
   {
     int c;
     objname = argv[argc-1];
@@ -34,18 +34,34 @@ namespace utils
   
     size_t location;
   
-  
-    if((location = objname.find('+')) != string::npos)
+    
+    if(get_last_arg)
     {
-      ownername = objname.substr(0, location);
-      objname = objname.substr(location + 1);
+      if((location = objname.find('+')) != string::npos)
+      {
+        ownername = objname.substr(0, location);
+        objname = objname.substr(location + 1);
+      }
+      else
+        ownername = username;
     }
-    else
-      ownername = username;
-  
-   return 1; //success
+    return 1; //success
  
   }
+
+  int get_params(int argc, char *argv[], const string& usage_string, string& username, string& groupname, string& ownername, string& objname)
+  {
+    return get_params(argc, argv, usage_string, username, groupname, objname, ownername, true);
+  }
+  int get_params(int argc, char *argv[], const string& usage_string, string& username, string& groupname, string& objname)
+  {
+    string s;
+    return get_params(argc, argv, usage_string, username, groupname, objname, s, false);
+    
+  }
+  
+  
+
 
   std::string itostr(int i)
   {

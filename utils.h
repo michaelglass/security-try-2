@@ -21,6 +21,10 @@ namespace utils
   */
   int get_params(int argc, char **, const string& usage_string, string& username, string& groupname, string& ownername, string& objname);
 
+  // same thing, doesnt split objname
+  int get_params(int argc, char **, const string& usage_string, string& username, string& groupname, string& objname);
+  
+
   /**
     returns a string representation of the int passed to it
     
