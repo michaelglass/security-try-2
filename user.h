@@ -70,6 +70,9 @@ namespace object_store
 	  
     User(const string& user_name) throw (UserException);    
     
+		User(const User& rhs);    
+    
+		
 		/**
 	    gets the user's name
 	    @return a pointer to a string of the user's name

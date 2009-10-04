@@ -25,7 +25,8 @@ namespace object_store
     /**
       creates / loads an acl object.
     */
-    PermissionsObject(Object& obj, bool can_read = true, bool can_write = true);
+    PermissionsObject(const Object& obj, bool can_read = true, bool can_write = true);
+    PermissionsObject(const PermissionsObject& rhs);
 
     /**
       checks to see if the user can read this file.

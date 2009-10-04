@@ -15,7 +15,7 @@ namespace object_store
   {}
   const char* UserObject::UserObjectException::what() const throw()
   {
-    return ("ObjectException: object name \""+ *_name +"\" is invalid.  Object names must be less than 254 chars and can only contain letters, numbers, underscores, and periods.").c_str();
+    return ("UserObjectException: UserObject name \""+ *_name +"\" is invalid.  UserObject names must be less than 254 chars and can only contain letters, numbers, underscores, and periods.").c_str();
   }
     
   string UserObject::path(const string& user_name)
@@ -73,4 +73,8 @@ namespace object_store
       throw uoe;
     }
   }
+  
+  UserObject::UserObject(const UserObject& rhs) : Object(((Object)rhs)), _owner(new User(*(rhs._owner)))
+  {}
+ 
 }

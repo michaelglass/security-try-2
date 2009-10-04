@@ -18,7 +18,10 @@ namespace object_store
     else
       return is;
   }
-  PermissionsObject::PermissionsObject(Object &obj, bool can_read, bool can_write) : Object(obj), _can_read(can_read), _can_write(can_write)
+  PermissionsObject::PermissionsObject(const Object &obj, bool can_read, bool can_write) : Object(obj), _can_read(can_read), _can_write(can_write)
+  {}
+  
+  PermissionsObject::PermissionsObject(const PermissionsObject& rhs) : Object(rhs), _can_read(rhs._can_read), _can_write(rhs._can_write)
   {}
 
   bool PermissionsObject::can_read() { return _can_read;}

@@ -82,7 +82,7 @@ namespace object_store
     }
   }
   
-  Object::Object(Object &o) : _name(new string(*o._name)), _path(new string(*o._path))
+  Object::Object(const Object &rhs) : _name(new string( *(rhs._name) )), _path( new string( *(rhs._path) ) )
   {}
   
 

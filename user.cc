@@ -99,6 +99,15 @@ namespace object_store
     }
     return pass; 
   }
+ 
+  User::User(const User& rhs)
+          : _user_name(new string(*(rhs._user_name))), 
+            _groups(new vector<const string*>)
+  {
+    vector<const string*>::iterator it;
+    for(it = rhs._groups->begin(); it < rhs._groups->end(); it++)
+      _groups->push_back(new string(**it));
+  }
   
   User::User(const string& user_name) throw (UserException) : _user_name(new string(user_name)), _groups(new vector<const string*>)
   {

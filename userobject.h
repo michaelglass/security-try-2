@@ -20,8 +20,8 @@ namespace object_store
     auto_ptr<User> _owner;
     static string path(const string& user_name);
     
-    static bool valid_name(const string& name);
   public:
+    static bool valid_name(const string& name);
     
     class UserObjectException : public exception 
     {
@@ -41,6 +41,7 @@ namespace object_store
       creates / loads a user object.  
     */
     UserObject(const string& user_name, const string& object_name) throw(Object::ObjectException, User::UserException, UserObjectException);
+    UserObject(const UserObject& rhs);
   };
 }
 #endif

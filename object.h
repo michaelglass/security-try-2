@@ -12,6 +12,7 @@ namespace object_store
   class Object
   {
   protected:
+    
     auto_ptr<string> _name;
     auto_ptr<string> _path;
     
@@ -56,7 +57,7 @@ namespace object_store
     /**
       copy constructor
     */
-    Object(Object &o);
+    Object(const Object &rhs);
     
     
     /**
