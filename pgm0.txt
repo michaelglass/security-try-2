@@ -1,0 +1,42 @@
+Object Store
+
+The purpose of this system is to store and retrieve "objects".
+An object is a file; in effect, you are implementing a flat file
+system, i.e., one without directories or folders.  How you store
+the objects is up to you, though you must not impose any unreasonable
+artificial limits on object size.  ("Unreasonable" means any limit not
+dictated by the size of the disk, your space quota, the maximum value
+you can store in an integer variable, etc.)  You are perfectly welcome
+to store each object as a separate Linux file.
+
+There are multiple user and groups.  The list of users and what groups
+they are in are also stored as objects.  That is, your code must use
+other parts of your system to retrieve this data.  The userfile is composed
+of lines in this format:
+
+	username group1 group2 ...
+
+There are three commands you must implement: objput, objget, objlist.
+The arguments are as follows:
+
+	objput -u username objname
+	objget -u username objname
+	objlist -u username [-l]
+
+All commands must have a valid username.  When an object is created, the
+creator's username is stored (somewhere, somehow).  You are welcome to create
+a small number of system users.  Each user has their own namespace; two
+different users can create objects of the same name.
+
+objput reads the contents of the object from stdin; objget writes the
+contents of a retrieved object to stdout.  objlist lists all of the objects
+belonging to the specified user; if the -l option is given (and options
+can appear in any order), all metadata associated with the object is
+displayed as well.  At this point, that's just the size of the object,
+but that will change...
+
+Usernames, group names, and object names can contain letters, digits,
+underscores, and periods; no other characters are legal.
+
+Pay a lot of attention to test data, and carefully read the packaging and
+submission instructions.

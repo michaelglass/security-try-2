@@ -1,14 +1,5 @@
-
 #include "utils.h"
 #include "objectstore.h"
-
-#include <string>
-#include <GetOpt.h>
-#include <ctype.h>
-#include <stdio.h>
-#include <sstream> //int to string conversion
-#include <iostream>
-#include <memory>
 
 #define USAGE_STRING  "Usage: objget -u username -g groupname objname\n" \
                       "  username        the username of the user getting the object.\n" \

@@ -1,5 +1,5 @@
 #include "utils.h"
-#include <iostream>
+#include "objectstore.h"
 
 #define USAGE_STRING  "Usage: objgetacl -u username -g groupname objname\n" \
                       "  username        the username of the user getting the acl.\n" \
@@ -9,12 +9,28 @@
 int main(int argc, char* argv[])
 {    
   using namespace std;
+  using namespace object_store;
+  using namespace utils;
 
-  string username, groupname, objname;
-  if(! utils::get_params(argc, argv, USAGE_STRING, username, groupname, objname) )
+  string ownername, username, groupname, objname;
+  if(! get_params(argc, argv, USAGE_STRING, username, groupname, ownername, objname) )
     return 1;
-
-  cout << "username: " << username
-      << "\ngroupname: " << groupname
-      << "\nobjname: " << objname << "\n";
+    
+  try{
+    auto_ptr<ACLObject> obj(new ACLObject(username, groupname, ownername, objname));
+    if(obj->exists())
+    {
+      auto_ptr<Object> acl(obj->get_ACL());  
+      cout << *acl;
+    }
+    else
+    {
+      cerr << USAGE_STRING << endl << "object doesnt exist" << endl;
+      return 2;
+    }
+  }
+  catch(exception& e){
+    cerr << USAGE_STRING << endl << e.what() << endl;
+    return 3;
+  }
 }

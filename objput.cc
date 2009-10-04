@@ -1,6 +1,5 @@
 #include "objectstore.h"
 #include "utils.h"
-#include <iostream>
 #include <stdio.h>
 
 #define USAGE_STRING  "Usage: objput -u username -g groupname objname\n" \

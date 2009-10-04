@@ -4,7 +4,7 @@ CFLAGS=		#-g -Wall -O2 -m64
 CXXFLAGS=	$(CFLAGS)
 DFLAGS=		
 OBJS=	 object.o user.o userobject.o permissionsobject.o acl.o aclobject.o utils.o
-PROGS=		tests objget objput
+PROGS=		tests objget objput objgetacl objsetacl objtestacl
 INCLUDES=	
 LIBS=
 
@@ -26,6 +26,16 @@ objget: $(OBJS) objget.o
 
 objput: $(OBJS) objput.o
 	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) objput.o -o $@ $(LIBS)
+
+objgetacl: $(OBJS) objgetacl.o
+	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) objgetacl.o -o $@ $(LIBS)
+
+objsetacl: $(OBJS) objsetacl.o
+	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) objsetacl.o -o $@ $(LIBS)
+
+objtestacl: $(OBJS) objtestacl.o
+	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) objtestacl.o -o $@ $(LIBS)
+
 
 	
 utils.o:utils.h

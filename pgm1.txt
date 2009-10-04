@@ -1,0 +1,55 @@
+Access Control Lists
+
+The assignment is to add access control lists to the object store.
+To do this, you will add three new commands:
+
+	objsetacl -u username -g groupname objname
+	objgetacl -u username -g groupname objname
+	objtestacl -u username -g groupname -a access objname
+
+These set an ACL, retrieve an ACL, and test if a certain kind of
+access is permitted.
+
+The objsetacl command reads an ACL from stdin.  The form is identical
+to that discussed in class: 0 or lines of the following syntax.
+
+	user.group    ops
+
+The possible "ops" are r, w, x, p, and v.  "p" is "permissions"; you need
+"p" permission to change an ACL.  "v" is "view"; you must have "v"
+permission to view an ACL for a file.  Note that objsetacl replaces the current
+ACL; there is no command to add or delete entries from one.
+
+The objgetacl command writes an object's ACL to stdout.
+
+objtestacl is the interesting one, of course, since it tests file permissions.
+It should output the single word "allowed" or "denied".
+
+For all of these commands, the -u username and -g groupname are the values to
+be compared against the ACL when deciding if permission should be granted
+or denied.  You will need to add a -g option to objget and objput; those commands
+should also check permissions.
+
+Pgm0 specified that each user had a separate name space.  Here, though,
+you want to be able to reference other users' objects.  Accordingly,
+objname needs an extended syntax: you can refer to a different user's
+objects via
+
+	username+objname
+
+The heart of this assignment is, of course, the permission-checking.
+
+Implementation hint 1: It is perfectly reasonable to either store objects
+in a single directory with that as the filename.  It is also reasonable
+to have a subdirectory for each user, and store the objects there.  Your
+choice; both work.
+
+Implementation hint 2: If you choose to use other objects to store
+ACLs, remember that these must be objects, not files.  More specifically,
+any code you use to read or write them must go through the object store
+routines.
+
+Implemenation hint 3: For simplicity, when a new object is create
+by some user u, create an initial ACL of
+
+	u.*	rwxpv

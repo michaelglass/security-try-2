@@ -33,7 +33,7 @@ namespace object_store
 
     virtual Object* clone() const;
   protected:
-    virtual istream& read(istream& is) throw(ACLException);
+    virtual istream& read(istream& is) throw(PermissionsObjectException);
   };
 }
 #endif

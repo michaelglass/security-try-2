@@ -18,7 +18,7 @@ namespace object_store
   ACL::ACL(const ACL& rhs) : PermissionsObject(rhs){}
   Object* ACL::clone() const{ return new ACL(*this); }
 
-  istream& ACL::read(istream& is) throw(ACLException) {
+  istream& ACL::read(istream& is) throw(PermissionsObjectException) {
     
     // cerr << "\nreading new ACL";
     if(can_write())
