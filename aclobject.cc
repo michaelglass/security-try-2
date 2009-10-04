@@ -36,7 +36,7 @@ namespace object_store
       else
       {
         _permissions = READ | WRITE | EXECUTE | PERMISSIONS | VIEW;
-        _acl_object = auto_ptr<PermissionsObject>(new PermissionsObject(UserObject(user_name, object_name + "@"), true, true));
+        _acl_object = auto_ptr<ACL>(new ACL(UserObject(user_name, object_name + "@"), true, true));
         return;
       } 
     }
@@ -97,7 +97,7 @@ namespace object_store
                   break;
                 }
                 
-              _acl_object = auto_ptr<PermissionsObject>(new PermissionsObject(*acl, can_view_permissions(), can_write_permissions()));
+              _acl_object = auto_ptr<ACL>(new ACL(*acl, can_view_permissions(), can_write_permissions()));
             }
           }
         }
@@ -108,7 +108,7 @@ namespace object_store
   
   ACLObject::ACLObject(const ACLObject& rhs)
               : PermissionsObject(rhs), 
-                _acl_object( (PermissionsObject*) rhs._acl_object->clone()), 
+                _acl_object( (ACL*) rhs._acl_object->clone()), 
                 _group(new string(*(rhs._group))),
                 _user(new User(*(rhs._user))),
                 _permissions(rhs._permissions)
@@ -124,9 +124,21 @@ namespace object_store
     return UserObject::valid_name(groupname);
   }
   
-  Object* ACLObject::ACL() { return _acl_object.get(); }
+  Object* ACLObject::get_ACL() { return _acl_object.get(); }
   
   bool ACLObject::can_execute() { return _permissions & EXECUTE; }
   bool ACLObject::can_view_permissions() { return _permissions & VIEW; }
   bool ACLObject::can_write_permissions() { return _permissions & PERMISSIONS; }
+  
+  istream& ACLObject::read(istream& is)
+  {
+    if(!exists())
+    {
+      stringstream default_permissions;
+      default_permissions << _user->name() << ".* rwxpv";
+      default_permissions >> *_acl_object;
+    }
+    return PermissionsObject::read(is);
+  }
+  
 }

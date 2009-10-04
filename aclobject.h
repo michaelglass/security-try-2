@@ -12,6 +12,7 @@
 #include "userobject.h"
 #include "object.h"
 #include "permissionsobject.h"
+#include "acl.h"
 
 namespace object_store
 {
@@ -19,7 +20,7 @@ namespace object_store
   
   class ACLObject : public PermissionsObject
   {
-    auto_ptr<PermissionsObject> _acl_object;
+    auto_ptr<ACL> _acl_object;
     auto_ptr<string> _group;
     auto_ptr<User> _user;
     short _permissions;
@@ -29,6 +30,7 @@ namespace object_store
     static const short VIEW = 0x8;
     static const short PERMISSIONS = 0x10;
     
+    virtual istream& read(istream& is);
   public:
     
     
@@ -61,7 +63,7 @@ namespace object_store
     virtual Object* clone() const;
     
     
-    Object* ACL();
+    Object* get_ACL();
     /**
       checks to see if the user can read/write/execute/view/write.
     */
