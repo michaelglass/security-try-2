@@ -16,9 +16,15 @@ namespace object_store
   
   class ACL : public PermissionsObject
   {
-  protected:
-    virtual istream& read(istream& is);
   public:
+    class ACLException : public PermissionsObject::PermissionsObjectException
+    {
+    public:
+      ACLException(const string& objname) throw();
+      virtual ~ACLException() throw();
+      virtual const char* what() const throw();
+
+    };
     /**
       creates / loads an acl object.
     */
@@ -26,6 +32,8 @@ namespace object_store
     ACL(const ACL& rhs);
 
     virtual Object* clone() const;
+  protected:
+    virtual istream& read(istream& is) throw(ACLException);
   };
 }
 #endif

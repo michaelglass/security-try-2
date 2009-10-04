@@ -36,7 +36,8 @@ namespace object_store
               (*it >= 'A' && *it <= 'Z') || //upper case?
               (*it >= '0' && *it <= '9') || //numeral?
               *it == '.' || //period or
-              *it == '_') ) //underscore?
+              *it == '_' ||
+              *it == '@') ) //underscore?
           return false; //if not, return false. 
       }
     }

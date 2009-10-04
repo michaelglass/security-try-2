@@ -16,8 +16,8 @@ namespace object_store
     auto_ptr<string> _name;
     auto_ptr<string> _path;
     
-    virtual ostream& write(ostream& os);
-    virtual istream& read(istream& is);
+    virtual ostream& write(ostream& os) throw(exception);
+    virtual istream& read(istream& is) throw(exception);
     
   public:
     class ObjectException : public exception 

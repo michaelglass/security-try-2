@@ -1,15 +1,14 @@
-#include "object.h"
-#include "user.h"
-#include "userobject.h"
-#include "permissionsobject.h"
+#include "objectstore.h"
 #include <string>
 #include <iostream>
 #include <sstream>
 #define LINE_LENGTH 150
 
+using namespace std;
+using namespace object_store;
+
 void title(const std::string& title)
 {
-  using namespace std;
   cout << endl << endl;
   size_t length = title.length();
   size_t i;
@@ -30,7 +29,6 @@ void title(const std::string& title)
 
 void test(const std::string& test_name, bool pass )
 {
-  using namespace std;
   cout << "test: " << test_name;
   size_t line_length = LINE_LENGTH - 15;
   for(size_t i = test_name.length(); i < line_length; i++)
@@ -41,7 +39,6 @@ void test(const std::string& test_name, bool pass )
 
 void object_tests()
 {
-  using namespace object_store;
   title("TESTING OBJECTS");
   
   string valid_name = "dog]", invalid_name = "..", valid_path = "test_dir/asdf/asdf/asdf/", invalid_path = "asdf/asdf/asd";
@@ -63,33 +60,32 @@ void object_tests()
   
   bool exeption_thrown = false;
    try
-    {
-      new Object(invalid_name);
-    }
-    catch (const Object::ObjectException &e)
-    {
-      exeption_thrown = true;
-    }
-    test("an invalid name causes an error to be thrown", exeption_thrown);
+  {
+    new Object(invalid_name);
+  }
+  catch (const Object::ObjectException &e)
+  {
+    exeption_thrown = true;
+  }
+  test("an invalid name causes an error to be thrown", exeption_thrown);
 
-    obj = new Object(valid_name, valid_path);
-    
-    string the_right_result = "test string";
-    stringstream my_in(the_right_result), my_out;
-    
-    my_in >> *obj;
-    my_out << *obj;
-    test("when I input and output file contents to my object the results are the same", my_in.str() == my_out.str());
-    
-    //now that I've created my obj, it should exist.
-    
-    test("now object should exist that we've written to it", obj->exists());
-    delete obj;
+  obj = new Object(valid_name, valid_path);
+  
+  string the_right_result = "test string";
+  stringstream my_in(the_right_result), my_out;
+  
+  my_in >> *obj;
+  my_out << *obj;
+  test("when I input and output file contents to my object the results are the same", my_in.str() == my_out.str());
+  
+  //now that I've created my obj, it should exist.
+  
+  test("now object should exist that we've written to it", obj->exists());
+  delete obj;
 }
 
 void user_tests()
 {
-  using namespace object_store;
   title("TESTING USERS");
   
   Object* new_user_obj = new Object("user_file","test_dir");
@@ -99,6 +95,7 @@ void user_tests()
   test_userfile << "\n\n!@#"; //invalid now
   test_userfile >> *new_user_obj;
   test("test userfile should NOT validate and be set", !User::set_userobj(new_user_obj) );
+  delete new_user_obj;
   string user_name = "elena";
   string group = "group2";
   test("user \""+user_name+"\" should be valid", User::valid_name(user_name));
@@ -134,7 +131,6 @@ void user_tests()
 
 void userobject_tests()
 {
-  using namespace object_store;
   
   title("TESTING USEROBJECTS");
   //initialization
@@ -175,11 +171,11 @@ void userobject_tests()
   my_in >> *obj;
   my_out << *obj;
   test("when I input and output file contents to my object the results are the same", my_in.str() == my_out.str());  
+  delete obj;
 }
 
 void permissionsobject_tests()
 {
-  using namespace object_store;
   title("TESTING PERMISSIONSOBJECTS");
   Object *obj, *permObj;
   obj = new UserObject("elena", "isafile");
@@ -190,9 +186,18 @@ void permissionsobject_tests()
   init_in >> *obj;
   
   permObj = new PermissionsObject(*obj, false, true);
-  init_out << *permObj;
+  
+  bool exception_thrown = false;
+  try
+  {
+    init_out << *permObj;
+  } catch (PermissionsObject::PermissionsObjectException& e)
+  {
+    exception_thrown = true;
+  }
   
   test("unreadable/writable permissions object should not be able to read a file", init_out.str() == "");
+  test("unreadable/writable permissions object when it tries an exception should be thrown", exception_thrown);
   
   string new_contents = "new contents";
   stringstream new_in(new_contents);
@@ -208,12 +213,85 @@ void permissionsobject_tests()
   init_out.str(""); //reset
   init_out << *permObj;
   test("readable/unwritable permissions object should be able to read the file", init_out.str() == new_contents);
-  
-  init_in >> *permObj;
+  exception_thrown = false;
+  try{
+    init_in >> *permObj;
+  } catch(PermissionsObject::PermissionsObjectException& e)
+  {
+    exception_thrown = true;
+  }
   
   test("but writing to it should leave the data unchanged", init_out.str() != init_str);
+  test("and an exception should be thrown", exception_thrown);
+  delete obj;
   delete permObj;
+}
+
+void ACL_tests()
+{
+  title("TESTING ACLS");
+  Object *acl;
+  acl = new ACL(UserObject("elena", "anACL"));
+  stringstream my_in, my_out;
+  my_in << "elena.* rwpx\n*.* prwx";
+  bool exception_thrown = false;
+  try
+  {
+    my_in >> *acl;
+  } catch (...)
+  {
+    exception_thrown = true;
+  }
+  test("I can write a valid ACL to the ACL without it throwing an error", !exception_thrown);
   
+  my_in.clear();
+  my_in.str("*.* ASDF");
+  exception_thrown = false;
+  try
+  {
+    my_in >> *acl;
+  } catch (...)
+  {
+    exception_thrown = true;
+  }
+  test("but if I write an invalid ACL, i get an error", exception_thrown);
+  delete acl;
+}
+
+void ACLObject_tests()
+{
+  title("TESTING ACLObjects");
+  
+  Object *aclobj;
+  
+  aclobj = new ACLObject("elena", "group3", "elena", "newfile");
+  stringstream str;
+  str << "first line....";
+  str >> *aclobj;
+  Object* acl = ((ACLObject*)aclobj)->get_ACL();
+
+  str.clear();
+  str.str("elena.* rwxpv\nmichael.* rwx");
+  str >> *acl;
+  delete acl;
+  delete aclobj;
+  
+  aclobj = new ACLObject("michael", "group1", "elena", "newfile");
+  ACLObject* testing;
+  testing = (ACLObject*) aclobj;
+  
+  test("so now that I've set the permissions, michael can read:", testing->can_read());
+  test("write", testing->can_write());
+  test("ex", testing->can_execute());
+  test("not view", !testing->can_view_permissions());
+  test("not change p", !testing->can_write_permissions());
+
+  PermissionsObject* p = testing->get_ACL();
+
+  test("so the permissions are right but can I actually access the acl?", (!p->can_read()) && (!p->can_write()));
+  
+  
+  delete aclobj;
 }
 
 int main(int argc, char **argv)
@@ -222,6 +300,7 @@ int main(int argc, char **argv)
   user_tests();
   userobject_tests();
   permissionsobject_tests();
-  
+  ACL_tests();
+  ACLObject_tests();
 }
 

@@ -1,20 +1,36 @@
 #include "acl.h"
 #include <sstream>
+#include <iostream>
+
 namespace object_store
 {
+  ACL::ACLException::ACLException(const string& name) throw() : PermissionsObjectException(name, false)
+  {}
+  ACL::ACLException::~ACLException() throw()
+  {}
+  const char* ACL::ACLException::what() const throw()
+  {
+    return ("ACLException:  Can't write malformed ACL to object + \""+*_name+"\"").c_str();
+  }
+  
+  
   ACL::ACL(const Object& obj, bool can_read, bool can_write) : PermissionsObject(obj, can_read, can_write){}
   ACL::ACL(const ACL& rhs) : PermissionsObject(rhs){}
   Object* ACL::clone() const{ return new ACL(*this); }
 
-  istream& ACL::read(istream& is) {
+  istream& ACL::read(istream& is) throw(ACLException) {
+    
+    // cerr << "\nreading new ACL";
     if(can_write())
     {
       stringstream new_acl;
       bool fail = false;
+      bool pass = false;
       while(!fail && is.good())
       {
         string line;
         getline(is, line);
+        // cerr << "\n" << line;
         if(line.length() > 0)
         {
           size_t curr_offset = 0;
@@ -55,16 +71,27 @@ namespace object_store
                 }
             }
           }
+          pass = true;
           new_acl << line << endl;
         }
         else
           fail = true;
       
       }
-      if(!fail)
+      if(fail || !pass)
+      {
+        // cerr << "\nfailed parsing, throwing error";
+        ACLException ae(*_name);
+        throw ae;
+      }
+      else
+      {
+        // cerr << "\ndidnt fail, writing acl";
         return PermissionsObject::read(new_acl);
+      }
     }
-    return is;
+    // cerr << "\n can't write, returning PermissionsObject version (should just be is eventually)";
+    return PermissionsObject::read(is);
   }
 
 }

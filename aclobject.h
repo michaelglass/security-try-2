@@ -30,7 +30,7 @@ namespace object_store
     static const short VIEW = 0x8;
     static const short PERMISSIONS = 0x10;
     
-    virtual istream& read(istream& is);
+    virtual istream& read(istream& is) throw();
   public:
     
     
@@ -63,7 +63,7 @@ namespace object_store
     virtual Object* clone() const;
     
     
-    Object* get_ACL();
+    PermissionsObject* get_ACL();
     /**
       checks to see if the user can read/write/execute/view/write.
     */

@@ -20,9 +20,18 @@ namespace object_store
     bool _can_read;
     bool _can_write;
     
-    virtual ostream& write(ostream& os);
-    virtual istream& read(istream& is);
   public:
+    
+    class PermissionsObjectException : public exception 
+    {
+      protected:
+        auto_ptr<const string> _name;
+        bool _can_read;
+      public:
+        PermissionsObjectException(const string& objname, bool can_read) throw();
+        virtual ~PermissionsObjectException() throw();
+        virtual const char* what() const throw();
+    };
     /**
       creates / loads an acl object.
     */
@@ -37,6 +46,9 @@ namespace object_store
     */
     virtual bool can_read();
     virtual bool can_write();
+  protected:
+    virtual ostream& write(ostream& os) throw(PermissionsObjectException);
+    virtual istream& read(istream& is) throw(PermissionsObjectException);
   };
 }
 #endif

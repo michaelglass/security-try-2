@@ -91,7 +91,7 @@ namespace object_store
   }
   
 
-  ostream& Object::write(ostream& os)
+  ostream& Object::write(ostream& os) throw(exception)
   {
     if(exists())
      {
@@ -113,7 +113,7 @@ namespace object_store
      return os;
   }
   
-  istream& Object::read(istream& is)
+  istream& Object::read(istream& is) throw(exception)
   {
     ofstream obj;
     obj.open( path().c_str() );
