@@ -3,8 +3,8 @@ CXX=		g++
 CFLAGS=		#-g -Wall -O2 -m64
 CXXFLAGS=	$(CFLAGS)
 DFLAGS=		
-OBJS=	 object.o user.o userobject.o permissionsobject.o acl.o aclobject.o
-PROGS=		tests
+OBJS=	 object.o user.o userobject.o permissionsobject.o acl.o aclobject.o utils.o
+PROGS=		tests objget
 INCLUDES=	
 LIBS=
 
@@ -20,8 +20,12 @@ all:$(PROGS)
 
 tests: $(OBJS) tests.o
 	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) tests.o -o $@ $(LIBS)
+
+objget: $(OBJS) objget.o
+	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) objget.o -o $@ $(LIBS)
+
 	
-# object.o:object.h
+utils.o:utils.h
 # user.o:user.h object.o
 # userobject.o:userobject.h user.o
 # permissionsobject.o:permissionsobject.h

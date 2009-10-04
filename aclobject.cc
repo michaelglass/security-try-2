@@ -14,7 +14,7 @@ namespace object_store
     
     return ("ACLObjectException: Groupname \""+*_group+"\" " + 
                               (_user->length() > 0 ? 
-                                "does not eist for user with username \""+*_user+"\""  :
+                                "does not exist for user with username \""+*_user+"\""  :
                               "is not valid.  Groupnames must be less than 254 chars and can only contain letters, numbers, underscores, and periods.") ).c_str();
   }
 
@@ -25,15 +25,24 @@ namespace object_store
                 _permissions(0)
   {
     if(!valid_group(group_name))
-      throw new ACLObjectException(group_name);
+    {
+      ACLObjectException aoe(group_name);
+      throw aoe;
+    }
     if(! _user->in_group(group_name) )
-      throw new ACLObjectException(group_name, user_name);
+    {
+      ACLObjectException aoe(group_name, user_name);
+      throw aoe;
+    }
     //else, grab permissions
     //couple of cases.  user == owner?
     if(!exists())
     {
       if(user_name != owner_name && !exists())
-        throw new ACLObjectException("","", true);
+      {
+        ACLObjectException aoe("","", true);
+        throw aoe;
+      }
       else
       {
         _permissions = READ | WRITE | EXECUTE | PERMISSIONS | VIEW;
