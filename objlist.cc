@@ -1,6 +1,7 @@
 #include "objectstore.h"
 #include <iostream>
 #include <string>
+#include <sstream>
 
 #define USAGE_STRING  "Usage: objlist -u username [-l]\n" \
                       "  username        the username whose available objects are being listed.\n" \
@@ -43,10 +44,18 @@ int main(int argc, char* argv[])
     for(it = objs->begin(); it < objs->end(); it++)
     {
       UserObject* obj = *it;
+      string name = obj->name();
+      cout << name;
       
-      cout << obj->name();
       if(show_metadata_flag)
-        cout << "......." << obj->length() << " bytes";
+      {
+        //LINE LENGTH defaults to 50
+        stringstream length;
+        length << obj->length();
+        for(int i = name.length() + length.str().length() + string("bytes").length(); i < 50; i++)
+          cout << ".";
+        cout << length.str() << " bytes";
+      }
       cout << endl;
       delete obj;
     }
