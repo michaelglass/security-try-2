@@ -35,8 +35,8 @@ namespace object_store
     /**
       checks to see if the user can read this file.
     */
-    bool can_read();
-    bool can_write();
+    virtual bool can_read();
+    virtual bool can_write();
   };
 }
 #endif

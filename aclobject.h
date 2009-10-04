@@ -17,7 +17,7 @@ namespace object_store
 {
   using namespace std;
   
-  class ACLObject : PermissionsObject
+  class ACLObject : public PermissionsObject
   {
     auto_ptr<PermissionsObject> _acl_object;
     auto_ptr<string> _group;
@@ -37,8 +37,9 @@ namespace object_store
        protected:
         auto_ptr<const string> _group;
         auto_ptr<const string> _user;
+        bool _file_not_there;
        public:
-        ACLObjectException(const string& group, const string& user = "") throw();
+        ACLObjectException(const string& group, const string& user = "", bool file_not_there = false) throw();
         virtual ~ACLObjectException() throw();
         virtual const char* what() const throw();
      };
@@ -64,8 +65,6 @@ namespace object_store
     /**
       checks to see if the user can read/write/execute/view/write.
     */
-    bool can_read();
-    bool can_write();
     bool can_execute();
     bool can_view_permissions();
     bool can_write_permissions();
