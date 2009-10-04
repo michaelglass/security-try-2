@@ -42,6 +42,8 @@ namespace object_store
     */
     UserObject(const string& user_name, const string& object_name) throw(Object::ObjectException, User::UserException, UserObjectException);
     UserObject(const UserObject& rhs);
+    
+    virtual Object* clone() const;
   };
 }
 #endif

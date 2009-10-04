@@ -16,6 +16,7 @@ namespace object_store
   class PermissionsObject : public Object
   {
   protected:
+    auto_ptr<Object> _original;
     bool _can_read;
     bool _can_write;
     
@@ -28,6 +29,9 @@ namespace object_store
     PermissionsObject(const Object& obj, bool can_read = true, bool can_write = true);
     PermissionsObject(const PermissionsObject& rhs);
 
+    virtual Object* clone() const;
+
+    Object* original();
     /**
       checks to see if the user can read this file.
     */

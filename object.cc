@@ -85,6 +85,11 @@ namespace object_store
   Object::Object(const Object &rhs) : _name(new string( *(rhs._name) )), _path( new string( *(rhs._path) ) )
   {}
   
+  Object* Object::clone() const
+  {
+    return new Object(*this);
+  }
+  
 
   ostream& Object::write(ostream& os)
   {

@@ -54,7 +54,12 @@ namespace object_store
       creates / loads an acl object.
     */
     ACLObject(const string& user_name, const string& group_name, const string& owner_name, const string& object_name) throw(Object::ObjectException, User::UserException, UserObject::UserObjectException, ACLObjectException);
-
+    
+    ACLObject(const ACLObject& rhs);
+    
+    virtual Object* clone() const;
+    
+    
     Object* ACL();
     /**
       checks to see if the user can read/write/execute/view/write.

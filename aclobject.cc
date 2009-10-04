@@ -15,8 +15,25 @@ namespace object_store
   }
 
   ACLObject::ACLObject(const string& user_name, const string& group_name, const string& owner_name, const string& object_name) throw(Object::ObjectException, User::UserException, UserObject::UserObjectException, ACLObjectException) 
-              : PermissionsObject(UserObject(owner_name, object_name) , false, false)
+              : PermissionsObject(UserObject(owner_name, object_name) , false, false) , 
+                _acl_object(new PermissionsObject((UserObject(owner_name, object_name + "@")),false,false)),
+                _group(new string(group_name)),
+                _user(new User(user_name)),
+                _permissions(0)
   {}
+  
+  ACLObject::ACLObject(const ACLObject& rhs)
+              : PermissionsObject(rhs), 
+                _acl_object( (PermissionsObject*) rhs._acl_object->clone()), 
+                _group(new string(*(rhs._group))),
+                _user(new User(*(rhs._user))),
+                _permissions(rhs._permissions)
+  {}
+  
+  Object* ACLObject::clone() const
+  {
+    return new ACLObject(*this);
+  }
 
   static bool valid_group(const string& groupname)
   {

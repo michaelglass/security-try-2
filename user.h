@@ -70,7 +70,7 @@ namespace object_store
 	  
     User(const string& user_name) throw (UserException);    
     
-		User(const User& rhs);    
+		User(const User& rhs);
     
 		
 		/**

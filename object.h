@@ -59,7 +59,7 @@ namespace object_store
     */
     Object(const Object &rhs);
     
-    
+    virtual Object* clone() const;
     /**
       getter for obj's name
     */

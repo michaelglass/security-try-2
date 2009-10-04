@@ -74,7 +74,13 @@ namespace object_store
     }
   }
   
-  UserObject::UserObject(const UserObject& rhs) : Object(((Object)rhs)), _owner(new User(*(rhs._owner)))
+  UserObject::UserObject(const UserObject& rhs) : Object(rhs), _owner(new User(*(rhs._owner)))
   {}
+ 
+  Object* UserObject::clone() const
+  {
+    return new UserObject(*this);
+  }
+  
  
 }
