@@ -40,8 +40,10 @@ namespace object_store
         auto_ptr<const string> _group;
         auto_ptr<const string> _user;
         bool _file_not_there;
+        bool _invalid_objname;
        public:
         ACLObjectException(const string& group, const string& user = "", bool file_not_there = false) throw();
+        ACLObjectException(const string& objname, bool invalid_objname) throw();
         virtual ~ACLObjectException() throw();
         virtual const char* what() const throw();
      };

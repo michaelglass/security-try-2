@@ -3,12 +3,18 @@
 
 namespace object_store
 {
-  ACLObject::ACLObjectException::ACLObjectException(const string& group, const string& user, bool file_not_there) throw() : _group(new string(group)), _user(new string(user)), _file_not_there(file_not_there)
+  ACLObject::ACLObjectException::ACLObjectException(const string& group, const string& user, bool file_not_there) throw() : _group(new string(group)), _user(new string(user)), _file_not_there(file_not_there), _invalid_objname(false)
+  {}
+  ACLObject::ACLObjectException::ACLObjectException(const string& objname, bool invalid_objname) throw() : _group(new string(objname)), _invalid_objname(invalid_objname)
   {}
   ACLObject::ACLObjectException::~ACLObjectException() throw()
   {}
   const char* ACLObject::ACLObjectException::what() const throw()
   {
+    if(_invalid_objname)
+    {
+      return ("ACLObjectException: Object name \"" + *_group + "\" is not valid.  Object names must be less than 254 chars and can only contain letters, numbers, underscores, and periods.").c_str();
+    }
     if(_file_not_there)
       return "ACLObjectException: File does not yet exist.  Can't access other users files that they haven't created";
     
@@ -24,6 +30,11 @@ namespace object_store
                 _user(new User(user_name)),
                 _permissions(0)
   {
+    if(!valid_group(object_name))
+    {
+      ACLObjectException aoe(object_name, true);
+      throw aoe;
+    }
     if(!valid_group(group_name))
     {
       ACLObjectException aoe(group_name);
@@ -130,7 +141,7 @@ namespace object_store
 
   bool ACLObject::valid_group(const string& groupname)
   {
-    return UserObject::valid_name(groupname);
+    return User::valid_name(groupname);
   }
   
   PermissionsObject* ACLObject::get_ACL() { return (PermissionsObject*)_acl_object->clone(); }
