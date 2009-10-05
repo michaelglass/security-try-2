@@ -8,8 +8,8 @@
                       "user1 group1 group2\n" \
                       "user2 gruop2 group3\n" \
                       "it may have no extraneous newlines\n"\
-                      "any user who is given no groups effetively has no access beyond objlist\n" \
-                      "*note settins userobj does not modify ex-users data.\n"
+                      "any user who is given no groups effectively has no access beyond objlist\n" \
+                      "*note setting userobj does not modify ex-users data.\n"
 
 int main(int argc, char* argv[])
 {    
