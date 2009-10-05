@@ -58,19 +58,19 @@ int main(int argc, char* argv[])
         switch(access)
         {
           case 'r':
-            cout << (obj->can_read() ? "CAN" : "CAN'T") << " READ";
+            cout << (obj->can_read() ? "allowed" : "denied");
             break;
           case 'w':
-            cout << (obj->can_write()? "CAN" : "CAN'T") << " WRITE";
+            cout << (obj->can_write()? "allowed" : "denied");
             break;
           case 'x':
-              cout << (obj->can_execute()? "CAN" : "CAN'T")<< " EXECUTE";
+              cout << (obj->can_execute()? "allowed" : "denied");
             break;
           case 'p':
-            cout << (obj->can_write_permissions()? "CAN" : "CAN'T")<< " CHANGE PERMISSIONS";
+            cout << (obj->can_write_permissions()? "allowed" : "denied");
             break;
           case 'v':
-            cout << (obj->can_view_permissions()? "CAN" : "CAN'T")<< " VIEW PERMISSIONS";
+            cout << (obj->can_view_permissions()? "allowed" : "denied");
             break;
           default: 
             return usage(USAGE_STRING);
@@ -79,7 +79,8 @@ int main(int argc, char* argv[])
       }
       else
       {
-        cerr << USAGE_STRING << endl << "object doesnt exist" << endl;
+        cout << "denied";
+        // cerr << USAGE_STRING << endl << "object doesnt exist" << endl;
         return 2;
       }
     }

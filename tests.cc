@@ -177,6 +177,8 @@ void userobject_tests()
   my_out << *obj;
   test("when I input and output file contents to my object the results are the same", my_in.str() == my_out.str());  
   delete obj;
+  
+  system("rm objectstore/*/*");
 }
 
 void permissionsobject_tests()
@@ -230,6 +232,7 @@ void permissionsobject_tests()
   test("and an exception should be thrown", exception_thrown);
   delete obj;
   delete permObj;
+  system("rm objectstore/*/*");
 }
 
 void ACL_tests()
@@ -261,6 +264,7 @@ void ACL_tests()
   }
   test("but if I write an invalid ACL, i get an error", exception_thrown);
   delete acl;
+  system("rm objectstore/*/*");
 }
 
 void ACLObject_tests()
