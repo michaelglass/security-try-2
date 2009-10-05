@@ -34,7 +34,7 @@ namespace object_store
     
     /**
       name has to be at least one char long and less than 255 chars long (or stdlib's FILENAME_MAX, whichever is smaller)
-      can only contains letters, digits, periods, underscores, @s and ^s.  Cannot be named . or ..
+      can only contains letters, digits, periods, underscores, @s and ^s.
     */
     static bool valid_name(const string& name);
     

@@ -1,0 +1,35 @@
+Michael Glass
+mgg2102
+
+Assignment (0 and) 1
+
+(I appologize if this is a little bit messy.  This is my first application written in C/C++ in many years)
+
+this code compiles to seven binaries:
+
+objget
+objput
+objlist
+objgetacl
+objsetacl * note an ACL or user file is malformed if it has any trailing newlines.
+objtestacl
+and
+tests
+
+obj* are all documented in their usages and in the pgm1.txt.
+
+tests is a set of unit tests I wrote testing library behind the obj* front-ends.  It is not comprehensive but it helped me catch a number of bugs while developing the software.
+
+The basic layout of the software is follows:
+
+All input/output is handled by the base Object class.  It's not much more than a wrapper around a file.  It protects the user from writing to subdirectories, and that's about all.  
+It provides virtual functions clone() (effectively a virtual copy constructor) as well as ostream operator<<(object) and istream opertor>>(object) friend functions that call virtual functions read and write.
+
+Class User is a class that handles parsing the userfile and validating usernames and groups.
+
+A UserObject is an objet that is namespaced to a user.  It does most of what is necessary in assignment 0.
+
+A PermissionsObject is an object that may have limited read/write access.  Reading or writing to an instance of PermissionsObject which has limited permissions may cause an exception.
+An ACL is a PermissionsOBject that validates ACL files if they are written to it and if it has write access.
+
+an ACLObject is an ACL wrapping a UserObject and a PermissionsObject wrapping a UserObject.  It is the object that I end up using in most of the application.

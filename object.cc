@@ -32,7 +32,7 @@ namespace object_store
     size_t max_length = (FILENAME_MAX < 255 ? FILENAME_MAX : 255) -1; //filename + 1-char prefix
   
     size_t length = name.length();
-    if(length < min_length || length > max_length || name == "." || name == "..") //too short, too long, "." or ".."
+    if(length < min_length || length > max_length) //too short, too long, "." or ".."
       return false;
     
     string::const_iterator it;
