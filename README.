@@ -13,6 +13,7 @@ objlist
 objgetacl
 objsetacl * note an ACL or user file is malformed if it has any trailing newlines.
 objtestacl
+objsetuserobj * note use this to set the userfile
 and
 tests
 

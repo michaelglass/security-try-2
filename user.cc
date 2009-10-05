@@ -57,7 +57,7 @@ namespace object_store
     {
       getline(user_str, line);
       if(line.length() == 0)
-        return false;
+        return false; //extraneous newlines == malformed user file
       istringstream line_parser(line);
       while(line_parser.good())
       {
@@ -71,13 +71,12 @@ namespace object_store
     
     if(pass)
     {
-      stringstream asdf;
-      asdf << *obj;
-      asdf >> *User::userobj;
+      stringstream buff; 
+      buff << *obj;
+      buff >> *User::userobj;
     }
     return pass;
-  }
-  
+  }  
   
   
   bool User::valid_name(const string& user_name)

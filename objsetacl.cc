@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
     
   if(isatty(fileno(stdin)) )
   {
-    cerr << USAGE_STRING << endl << "error: objput must be piped a file!" << endl;
+    cerr << USAGE_STRING << endl << "error: objsetacl must be piped a file!" << endl;
     return 2;
   }
     

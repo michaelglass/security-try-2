@@ -72,7 +72,9 @@ namespace object_store
             }
           }
           pass = true;
-          new_acl << line << endl;
+          new_acl << line;
+          if(is.good())
+            new_acl << endl;
         }
         else
           fail = true;

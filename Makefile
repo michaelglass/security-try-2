@@ -4,7 +4,7 @@ CFLAGS=		#-g -Wall -O2 -m64
 CXXFLAGS=	$(CFLAGS)
 DFLAGS=		
 OBJS=	 object.o user.o userobject.o permissionsobject.o acl.o aclobject.o utils.o
-PROGS=		tests objget objput objgetacl objsetacl objtestacl objlist
+PROGS=		tests objget objput objgetacl objsetacl objtestacl objlist objsetuserobj
 INCLUDES=	
 LIBS=
 
@@ -38,6 +38,9 @@ objtestacl: $(OBJS) objtestacl.o
 
 objlist: $(OBJS) objlist.o
 	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) objlist.o -o $@ $(LIBS)
+
+objsetuserobj: $(OBJS) objsetuserobj.o
+	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) objsetuserobj.o -o $@ $(LIBS)
 
 test: build
 	@echo "-running unit tests and initializing user database-"
