@@ -1,5 +1,5 @@
 #include "utils.h"
-#include <GetOpt.h>
+#include <getopt.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <sstream> //int to string conversion

@@ -46,3 +46,4 @@ utils.o:utils.h
 # permissionsobject.o:permissionsobject.h
 clean:
 	rm -f *.o a.out $(PROGS) *~ *.a
+	
