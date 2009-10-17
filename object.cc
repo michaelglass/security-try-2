@@ -11,6 +11,9 @@ namespace object_store
 {
   Object::ObjectException::ObjectException(const string& name, const string& path) throw() : _name(new string(name)), _path(new string(path))
   {}
+  Object::ObjectException::ObjectException(const ObjectException& rhs) throw() : _name(new string(*rhs._name)), _path(new string(*rhs._path))
+  {}
+  
 
   Object::ObjectException::~ObjectException() throw()
   {}
@@ -77,8 +80,7 @@ namespace object_store
   
     if(!valid_name || !valid_path) //FAIL!
     {
-      ObjectException oe(valid_name? "": name, valid_path? "": path);
-      throw oe;
+      throw ObjectException(valid_name? "": name, valid_path? "": path);
     }
   }
   

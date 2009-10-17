@@ -28,6 +28,7 @@ namespace object_store
 
       public:
        ObjectException(const string& name, const string& path = "") throw();
+       ObjectException(const ObjectException& rhs) throw();
        virtual ~ObjectException() throw();
        virtual const char* what() const throw();
     };
