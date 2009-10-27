@@ -18,11 +18,11 @@ int main(int argc, char* argv[])
   if(! get_params(argc, argv, USAGE_STRING, username, groupname, ownername, objname) )
     return 1;
     
-  if(isatty(fileno(stdin)) )
-  {
-    cerr << USAGE_STRING << endl << "error: objsetacl must be piped a file!" << endl;
-    return 2;
-  }
+  // if(isatty(fileno(stdin)) )
+  // {
+  //   cerr << USAGE_STRING << endl << "error: objsetacl must be piped a file!" << endl;
+  //   return 2;
+  // }
     
 
   try{

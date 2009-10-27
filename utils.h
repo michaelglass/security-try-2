@@ -2,6 +2,7 @@
 #define MGG2102_SECURITY_UTILS_H
 
 #include <string>
+#include <vector>
 
 namespace utils
 {
@@ -33,6 +34,32 @@ namespace utils
   */
   string itostr(int i);
   
+  
+  /**
+    populates user info
+    
+    @param int& userid
+    @param int& groupid
+    @param string& username
+    @param string& groupname
+    
+    @return 0 on success.  error code on failure.  
+  */
+  int get_userinfo(string& username, vector<string*>& groupname);
+
+/*sets up setuid vars  */
+  void setup_setuid(void);
+ 
+ /** the following two code snippets are taken from here:
+ http://www.aquaphoenix.com/ref/gnu_c_library/libc_438.html
+ */
+/* Restore the effective UID to its original value. */
+
+  void do_setuid (void);
+
+/* Set the effective UID to the real UID. */
+
+  void undo_setuid (void);
 }
 
 

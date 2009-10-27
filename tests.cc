@@ -6,6 +6,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <string>
+#include "utils.h"
 
 #define LINE_LENGTH 150
 
@@ -305,11 +306,13 @@ void ACLObject_tests()
 
 int main(int argc, char **argv)
 {
-  object_tests();
-  user_tests();
-  userobject_tests();
-  permissionsobject_tests();
-  ACL_tests();
-  ACLObject_tests();
+  // object_tests();
+  // user_tests();
+  // userobject_tests();
+  // permissionsobject_tests();
+  // ACL_tests();
+  // ACLObject_tests();
+  
+  utils::setup_setuid(void);
 }
 
