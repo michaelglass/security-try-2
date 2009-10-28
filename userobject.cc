@@ -1,5 +1,5 @@
 #include "userobject.h"
-
+#include "utils.h"
 #include "user.h"
 #include "object.h"
 #include <sys/types.h> //needed for various directory methods
@@ -84,18 +84,20 @@ namespace object_store
   
   vector<UserObject*>* UserObject::objects(const string& user_name) throw(User::UserException)
   {
-    User u(user_name); //throws error if there's an issue
+    // User u(user_name); //throws error if there's an issue
     string path(UserObject::path(user_name));
     
     vector<UserObject*>* rval = new vector<UserObject*>();
  
     DIR *dp;
     struct dirent *dirp;
+    utils::do_setuid();
     if((dp  = opendir(path.c_str())) == NULL) {
-      cerr << "Error(" << errno << ") opening " << path << endl;
+      utils::undo_setuid();
+      // cerr << "Error(" << errno << ") opening " << path << endl;
       return 0;
     }
-
+    
     while ((dirp = readdir(dp)) != NULL)
     {
       string objname(dirp->d_name);
@@ -107,6 +109,8 @@ namespace object_store
     }
 
     closedir(dp);
+    utils::undo_setuid();
+
     return rval;    
   }
   

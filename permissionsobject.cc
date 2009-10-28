@@ -1,5 +1,6 @@
 #include "permissionsobject.h"
 #include <iostream>
+#include "utils.h"
 
 namespace object_store
 {
@@ -26,7 +27,9 @@ namespace object_store
   istream& PermissionsObject::read(istream& is) throw(PermissionsObjectException)
   {
     if(can_write())
+    {
       return Object::read(is);
+    }
     else
     {
       PermissionsObjectException poe(*_name, true);

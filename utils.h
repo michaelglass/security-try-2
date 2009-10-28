@@ -25,6 +25,10 @@ namespace utils
   // same thing, doesnt split objname
   int get_params(int argc, char **, const string& usage_string, string& username, string& groupname, string& objname);
   
+  int get_params(int argc, char* argv[], const string& usage_string, string& username, vector<const string*>& groupnames, string& ownername, string& objname);
+  
+  
+  int get_obj_and_owner(int argc, char*argv[], const string& usage_string, string& ownername, string& objname, string& username);
 
   /**
     returns a string representation of the int passed to it
@@ -38,14 +42,12 @@ namespace utils
   /**
     populates user info
     
-    @param int& userid
-    @param int& groupid
     @param string& username
     @param string& groupname
     
-    @return 0 on success.  error code on failure.  
+    @return 1 on success.  0 on failure  
   */
-  int get_userinfo(string& username, vector<string*>& groupname);
+  int get_userinfo(string& username, vector<const string*>& groupname);
 
 /*sets up setuid vars  */
   void setup_setuid(void);

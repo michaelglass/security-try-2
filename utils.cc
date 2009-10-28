@@ -67,6 +67,44 @@ namespace utils
     
   }
   
+  int get_params(int argc, char* argv[], const string& usage_string, string& username, vector<const string*>& groupnames, string& ownername, string& objname)
+  {
+    if(argc < 2)
+    {
+      cerr << usage_string;
+      return 0;
+    }
+    if(get_userinfo(username, groupnames))
+    {
+      return get_obj_and_owner(argc, argv, usage_string, ownername, objname, username);
+    }
+    else
+      return 0;
+  }
+    
+  int get_obj_and_owner(int argc, char*argv[], const string& usage_string, string& ownername, string& objname, string& username)
+  {
+    size_t location;
+    objname = argv[argc-1];
+    if(objname.length() == 0)
+    {
+      cerr << usage_string;
+      return 0;
+    }
+    if((location = objname.find('+')) != string::npos)
+    {
+      ownername = objname.substr(0, location);
+      objname = objname.substr(location + 1);
+      if(ownername.length() == 0 || objname.length() == 0)
+      {
+        cerr << usage_string << "\n can't have a '+' in the username or objname\n";
+        return 0;
+      }
+    }
+    ownername = username;
+    return 1;
+  }
+  
   std::string itostr(int i)
   {
     stringstream s;
@@ -74,15 +112,14 @@ namespace utils
     return s.str();
   }
   
-  int get_userinfo(string& username, vector<string*>& groupnames)
+  int get_userinfo(string& username, vector<const string*>& groupnames)
   {
-    int i = 0;
     
     char* login = getlogin();
     if(login) //if not null, ie if success 
       username = string(login);
     else
-      return 1;
+      return 0;
     
     gid_t *groups;
     int ngroups;
@@ -90,13 +127,13 @@ namespace utils
     
     ngroups_max = sysconf(_SC_NGROUPS_MAX) + 1;
     
-    groups = (gid_t *)malloc(ngroups_max *sizeof(gid_t)) ;
+    groups = (gid_t *)malloc(ngroups_max *sizeof(gid_t));
 
 
     ngroups = getgroups(ngroups_max, groups);
     
     if(ngroups <= 0)
-      return 1;
+      return 0;
 
     for(int i = 0; i != ngroups; i++)
     {
@@ -104,16 +141,17 @@ namespace utils
       groupnames.push_back(new string(gr->gr_name));
     }
         
-    return 0;
+    return 1;
   }
   
   /* Save the effective and real UIDs. */
   
   static uid_t euid, ruid;
-
+  static bool is_setuid = false;
 
   void setup_setuid(void)
   {
+    is_setuid = true;
     ruid = getuid ();
     euid = geteuid ();
     undo_setuid ();
@@ -125,17 +163,20 @@ namespace utils
   void
   do_setuid (void)
   {
-    int status;
+    if(is_setuid)
+    {
+      int status;
 
-  #ifdef _POSIX_SAVED_IDS
-    status = setuid (euid);
-  #else
-    status = setreuid (ruid, euid);
-  #endif
-    if (status < 0) {
-      fprintf (stderr, "Couldn't set uid.\n");
-      exit (status);
-      }
+    #ifdef _POSIX_SAVED_IDS
+      status = setuid (euid);
+    #else
+      status = setreuid (ruid, euid);
+    #endif
+      if (status < 0) {
+        fprintf (stderr, "Couldn't set uid.\n");
+        exit (status);
+        }
+    }
   }
 
 
@@ -144,17 +185,20 @@ namespace utils
   void
   undo_setuid (void)
   {
-    int status;
+    if(is_setuid)
+    {
+      int status;
 
-  #ifdef _POSIX_SAVED_IDS
-    status = setuid (ruid);
-  #else
-    status = setreuid (euid, ruid);
-  #endif
-    if (status < 0) {
-      fprintf (stderr, "Couldn't set uid.\n");
-      exit (status);
-      }
+    #ifdef _POSIX_SAVED_IDS
+      status = setuid (ruid);
+    #else
+      status = setreuid (euid, ruid);
+    #endif
+      if (status < 0) {
+        fprintf (stderr, "Couldn't set uid.\n");
+        exit (status);
+        }
+    }
   }
   
   

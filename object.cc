@@ -5,7 +5,7 @@
 #include <memory>
 #include <iostream>
 #include <exception>
-
+#include "utils.h"
 
 namespace object_store
 {
@@ -63,12 +63,25 @@ namespace object_store
   {
     if(path.length() > 1) //if it's not empty...
     {
+      utils::do_setuid();
       struct stat s;
       if( path.find("..") != string::npos ||  //path has a .., illegal
-          path[0] == '/' ||                   //path[0] can't be /
-          stat(path.c_str(), &s) != 0 ||      //path has to exist
-          !S_ISDIR(s.st_mode) )               //and has to be a dir
+          path[0] == '/')                   //path[0] can't be /
+      {          //path has to exist
+        utils::undo_setuid();
         return false;    
+      }
+      else
+      {
+        if(stat(path.c_str(), &s) != 0)               //and has to be a dir
+          if(mkdir(path.c_str(), S_IRWXU) != 0)
+          {
+            utils::undo_setuid();
+            return false;
+          }
+      }
+      utils::undo_setuid();
+      
     }
     return true;
   }
@@ -98,7 +111,9 @@ namespace object_store
     if(exists())
      {
        ifstream obj;
+       utils::do_setuid();
        obj.open( path().c_str() );
+       utils::undo_setuid();
        if(obj.is_open())
        {
          char buff[4096]; //arbitrary 4k buffer
@@ -118,7 +133,9 @@ namespace object_store
   istream& Object::read(istream& is) throw(exception)
   {
     ofstream obj;
+    utils::do_setuid();
     obj.open( path().c_str() );
+    utils::undo_setuid();
     if(obj.is_open())
     {
       char buff[4096];

@@ -19,9 +19,11 @@ namespace object_store
   class UserObject : public Object
   {
     auto_ptr<User> _owner;
-    static string path(const string& user_name);
     
   public:
+
+    static string path(const string& user_name);
+
     /**
       returns a list of objs for that user
     */

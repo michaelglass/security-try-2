@@ -1,5 +1,9 @@
 #include "aclobject.h"
 #include <sstream>
+#include <sys/types.h> //needed for various directory methods
+#include <sys/stat.h> //needed for various directory methods.
+#include <dirent.h>
+#include <errno.h>
 
 namespace object_store
 {
@@ -24,27 +28,48 @@ namespace object_store
                               "is not valid.  Groupnames must be less than 254 chars and can only contain letters, numbers, underscores, and periods.") ).c_str();
   }
 
+
   ACLObject::ACLObject(const string& user_name, const string& group_name, const string& owner_name, const string& object_name) throw(Object::ObjectException, User::UserException, UserObject::UserObjectException, ACLObjectException) 
               : PermissionsObject(UserObject(owner_name, object_name) , true, true) , 
-                _group(new string(group_name)),
+                _groups(new vector<const string*>) ,
                 _user(new User(user_name)),
                 _permissions(0)
   {
+    _groups->push_back(new string(group_name));
+    initialize(user_name, owner_name, object_name);
+  }
+  
+
+  ACLObject::ACLObject(const string& user_name, vector<const string*>* groups, const string& owner_name, const string& object_name) throw(Object::ObjectException, User::UserException, UserObject::UserObjectException, ACLObjectException)
+              : PermissionsObject(UserObject(owner_name, object_name) , true, true) , 
+                _groups(groups) ,
+                _user(new User(user_name)),
+                _permissions(0)
+  {
+    initialize(user_name, owner_name, object_name);
+  }
+
+  
+  
+    
+
+  void ACLObject::initialize(const string& user_name, const string& owner_name, const string& object_name) throw(Object::ObjectException, User::UserException, UserObject::UserObjectException, ACLObjectException)
+  {    
     if(!valid_group(object_name))
     {
       ACLObjectException aoe(object_name, true);
       throw aoe;
     }
-    if(!valid_group(group_name))
-    {
-      ACLObjectException aoe(group_name);
-      throw aoe;
-    }
-    if(! _user->in_group(group_name) )
-    {
-      ACLObjectException aoe(group_name, user_name);
-      throw aoe;
-    }
+    // if(!valid_group(group_name))
+    // {
+    //   ACLObjectException aoe(group_name);
+    //   throw aoe;
+    // }
+    // if(! _permissions->in_group(group_name) )
+    // {
+    //   ACLObjectException aoe(group_name, user_name);
+    //   throw aoe;
+    // }
     //else, grab permissions
     //couple of cases.  user == owner?
     if(!exists())
@@ -59,7 +84,7 @@ namespace object_store
         _permissions = READ | WRITE | EXECUTE | PERMISSIONS | VIEW;
         _acl_object = auto_ptr<ACL>(new ACL(UserObject(owner_name, object_name + "@"), true, true));
         return;
-      } 
+      }
     }
     else
     {
@@ -84,7 +109,13 @@ namespace object_store
             curr_offset = next_offset + 1; //skipping '.'
             next_offset = line.find(' ', curr_offset); 
             string group = line.substr(curr_offset, next_offset - curr_offset);
-            if(group == "*" || group == group_name) //group match!
+            bool group_match = (group == "*");
+            vector<const string*>::const_iterator it;
+            
+            for(it = _groups->begin(); !group_match && it < _groups->end(); it++)
+              group_match = **it == group;
+            
+            if(group_match) //group match!
             {
               found_user_and_group = true;
               string permissions = line.substr(next_offset+1);
@@ -118,7 +149,6 @@ namespace object_store
             }
           }
         }
-
       }
       _can_read  = _permissions & READ;
       _can_write = _permissions & WRITE;
@@ -129,10 +159,14 @@ namespace object_store
   ACLObject::ACLObject(const ACLObject& rhs)
               : PermissionsObject(rhs), 
                 _acl_object( (ACL*) rhs._acl_object->clone()), 
-                _group(new string(*(rhs._group))),
+                _groups(new vector<const string*> ),
                 _user(new User(*(rhs._user))),
                 _permissions(rhs._permissions)
-  {}
+  {
+    vector<const string*>::const_iterator it;
+    for(it = rhs._groups->begin(); it < rhs._groups->end(); it++)
+      _groups->push_back(new string(**it));
+  }
   
   Object* ACLObject::clone() const
   {
@@ -164,6 +198,10 @@ namespace object_store
   vector<UserObject*>* ACLObject::objects(const string& user_name) throw(User::UserException)
   {
     vector<UserObject*>* rval = UserObject::objects(user_name);
+    if(!rval)
+    {
+      return new vector<UserObject*>;
+    }
     vector<UserObject*>::iterator it;
     for(it = rval->begin(); it < rval->end(); it++)
     {

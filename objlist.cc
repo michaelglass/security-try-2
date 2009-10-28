@@ -1,11 +1,12 @@
 #include "objectstore.h"
+#include "utils.h"
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <vector>
 
-#define USAGE_STRING  "Usage: objlist -u username [-l]\n" \
-                      "  username        the username whose available objects are being listed.\n" \
-                      "  -l              list all metadata associated with each object\n"
+#define USAGE_STRING  "Usage: objlist [-l]\n" \
+                      "  -l              (optional)list all metadata associated with each object\n"
 
 
 int usage(const std::string& usage_string)
@@ -20,22 +21,21 @@ int main(int argc, char* argv[])
   using namespace object_store;
 	int c;
   string username;
+  vector<const string*>* groups = new vector<const string*>();
+  
+  utils::get_userinfo(username, *groups);
 	bool show_metadata_flag = false;
 	
-	while((c = getopt(argc, argv, "u:l")) != -1)
+	while((c = getopt(argc, argv, "l")) != -1)
 		switch(c)
 		{
 			case 'l':
 				show_metadata_flag = true;
 				break;
-			case 'u':
-				username = optarg;
-				break;
 			default:
         return usage(USAGE_STRING);
 		}
-	if(username.length() == 0)
-    return usage(USAGE_STRING);
+    
     
   try{
     auto_ptr< vector<UserObject*> > objs(ACLObject::objects(username));

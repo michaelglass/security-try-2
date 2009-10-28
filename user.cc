@@ -110,7 +110,7 @@ namespace object_store
   
   User::User(const string& user_name) throw (UserException) : _user_name(new string(user_name)), _groups(new vector<const string*>)
   {
-    bool fail = true;
+    // bool fail = true;
     
     if(!valid_name(user_name))
     {
@@ -118,39 +118,39 @@ namespace object_store
       throw ue;
     }
     
-    stringstream user_str;
-    
-    user_str << *User::userobj;
-    
-    string user;
-    string* group;
-    string line;
-    
-    while(user_str.good() && fail) //while user/groups not set
-    {
-      getline(user_str, line);
-      if(line.length() > 0)
-      {
-        istringstream line_parser(line);
-        line_parser >> user;
-        if(user == user_name)
-        {
-          fail = false;
-          while(line_parser.good())
-          {
-            group = new string();
-            line_parser >> *group;
-            _groups->push_back(group);
-          }
-        }
-      } 
-    }
-    
-    if(fail)
-    {
-      UserException ue(user_name, true);
-      throw ue;
-    }      
+    // stringstream user_str;
+    // 
+    // user_str << *User::userobj;
+    // 
+    // string user;
+    // string* group;
+    // string line;
+    // 
+    // while(user_str.good() && fail) //while user/groups not set
+    // {
+    //   getline(user_str, line);
+    //   if(line.length() > 0)
+    //   {
+    //     istringstream line_parser(line);
+    //     line_parser >> user;
+    //     if(user == user_name)
+    //     {
+    //       fail = false;
+    //       while(line_parser.good())
+    //       {
+    //         group = new string();
+    //         line_parser >> *group;
+    //         _groups->push_back(group);
+    //       }
+    //     }
+    //   } 
+    // }
+    // 
+    // if(fail)
+    // {
+    //   UserException ue(user_name, true);
+    //   throw ue;
+    // }      
   }
   
   User::~User()

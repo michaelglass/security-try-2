@@ -2,10 +2,7 @@
 #include "objectstore.h"
 #include <stdio.h>
 
-#define USAGE_STRING  "Usage: objsetacl -u username -g groupname objname\n" \
-                      "  objput must also be piped a file (ie, objput < filename or cat file | objput)\n" \
-                      "  username        the username of the user setting the ACL.\n" \
-                      "  groupname       the groupname of the user setting the ACL.\n" \
+#define USAGE_STRING  "Usage: objsetacl objname\n" \
                       "  objname         the name of the object whose ACL is being set.\n"
 
 int main(int argc, char* argv[])
@@ -14,10 +11,12 @@ int main(int argc, char* argv[])
   using namespace object_store;
   using namespace utils;
 
-  string ownername, username, groupname, objname;
-  if(! get_params(argc, argv, USAGE_STRING, username, groupname, ownername, objname) )
-    return 1;
+  string ownername, username, objname;
+  vector<const string*>* groups = new vector<const string*>();
     
+  if(! get_params(argc, argv, USAGE_STRING, username, *groups, ownername, objname) )
+    return 1;
+        
   // if(isatty(fileno(stdin)) )
   // {
   //   cerr << USAGE_STRING << endl << "error: objsetacl must be piped a file!" << endl;
@@ -26,7 +25,7 @@ int main(int argc, char* argv[])
     
 
   try{
-    auto_ptr<ACLObject> obj(new ACLObject(username, groupname, ownername, objname));
+    auto_ptr<ACLObject> obj(new ACLObject(username, groups, ownername, objname));
     if(obj->exists())
     {
       auto_ptr<Object> acl(obj->get_ACL());  

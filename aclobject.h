@@ -22,7 +22,7 @@ namespace object_store
   class ACLObject : public PermissionsObject
   {
     auto_ptr<ACL> _acl_object;
-    auto_ptr<string> _group;
+    auto_ptr<vector<const string*> > _groups;
     auto_ptr<User> _user;
     short _permissions;
     static const short READ = 0x1;
@@ -41,7 +41,7 @@ namespace object_store
     class ACLObjectException : public exception 
      {
        protected:
-        auto_ptr<const string> _group;
+        auto_ptr<string> _group;
         auto_ptr<const string> _user;
         bool _file_not_there;
         bool _invalid_objname;
@@ -63,6 +63,12 @@ namespace object_store
       creates / loads an acl object.
     */
     ACLObject(const string& user_name, const string& group_name, const string& owner_name, const string& object_name) throw(Object::ObjectException, User::UserException, UserObject::UserObjectException, ACLObjectException);
+    /**
+      creates / loads an acl object.
+    */
+    ACLObject(const string& user_name, vector<const string*>* groups, const string& owner_name, const string& object_name) throw(Object::ObjectException, User::UserException, UserObject::UserObjectException, ACLObjectException);
+
+
     
     ACLObject(const ACLObject& rhs);
     
@@ -76,6 +82,9 @@ namespace object_store
     bool can_execute();
     bool can_view_permissions();
     bool can_write_permissions();
+    
+  private:
+    void initialize(const string& user_name, const string& owner_name, const string& object_name) throw(Object::ObjectException, User::UserException, UserObject::UserObjectException, ACLObjectException);
   };
 }
 #endif

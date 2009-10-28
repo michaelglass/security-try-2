@@ -1,9 +1,8 @@
 #include "objectstore.h"
+#include "utils.h"
 #include <iostream>
 #include <cctype>
-#define USAGE_STRING  "Usage: objtestacl -u username -g groupname -a access objname\n" \
-                      "  username        the username for whom access is being tested.\n" \
-                      "  groupname       the groupname of the username whose access is being tested.\n" \
+#define USAGE_STRING  "Usage: objtestacl -a access objname\n" \
                       "  access          the access (r,w,x,p or v) being tested\n" \
                       "  objname         the name of the object against which the user/group/access is being tested.\n"
 
@@ -19,23 +18,23 @@ int main(int argc, char* argv[])
   using namespace std;
   using namespace object_store;
 	int c;
-  string username, groupname, objname, ownername;
+  string ownername, username, objname;
+  vector<const string*>* groups = new vector<const string*>();
+  
+  utils::get_userinfo(username, *groups);
+  
+  
   char access(0);
   
 	
   objname = argv[argc-1];
-	while((c = getopt(argc-1, argv, "u:g:a:")) != -1)
+  
+	while((c = getopt(argc-1, argv, "a:")) != -1)
 		switch(c)
 		{
 			case 'a':
 				access = tolower(optarg[0]);
 				break;
-			case 'u':
-				username = optarg;
-				break;
-			case 'g':
-        groupname = optarg;
-        break;
 			default:
         return usage(USAGE_STRING);
 		}
@@ -52,7 +51,7 @@ int main(int argc, char* argv[])
     ownername = username;
   
   try{
-      auto_ptr<ACLObject> obj(new ACLObject(username, groupname, ownername, objname));
+      auto_ptr<ACLObject> obj(new ACLObject(username, groups, ownername, objname));
       if(obj->exists())
       {
         switch(access)

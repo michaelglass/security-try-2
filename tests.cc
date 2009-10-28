@@ -1,6 +1,7 @@
 #include "objectstore.h"
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <vector>
 #include <dirent.h>
@@ -47,7 +48,7 @@ void object_tests()
 {
   title("TESTING OBJECTS");
   
-  string valid_name = "dog]", invalid_name = "..", valid_path = "test_dir/asdf/asdf/asdf/", invalid_path = "asdf/asdf/asd";
+  string valid_name = "dog]", invalid_name = "..$", valid_path = "test_dir/asdf/asdf/asdf/", invalid_path = "asdf/asdf/asd";
   
   //path testing
   test(valid_name + " is a valid name", Object::valid_name(valid_name));
@@ -306,13 +307,23 @@ void ACLObject_tests()
 
 int main(int argc, char **argv)
 {
-  // object_tests();
-  // user_tests();
-  // userobject_tests();
-  // permissionsobject_tests();
-  // ACL_tests();
-  // ACLObject_tests();
+  object_tests();
+  user_tests();
+  userobject_tests();
+  permissionsobject_tests();
+  ACL_tests();
+  ACLObject_tests();
   
-  utils::setup_setuid(void);
+  // utils::setup_setuid();
+  // //try to write a protected file
+  // ofstream obj;
+  // utils::do_setuid();
+  // obj.open("protected");
+  // utils::undo_setuid();
+  // 
+  // obj << "this shouldn't work";
+  // // utils::do_setuid();
+  // obj.close();
+  //should fail
 }
 
