@@ -10,6 +10,7 @@ int main(int argc, char* argv[])
   using namespace std;
   using namespace object_store;
   using namespace utils;
+  utils::setup_setuid();
 
   string ownername, username, objname;
   vector<const string*>* groups = new vector<const string*>();

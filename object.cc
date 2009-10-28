@@ -171,8 +171,13 @@ namespace object_store
   {
     struct stat s;
     //if the file already exists . . . 
-    return (  stat(path().c_str(), &s) == 0 &&      //path has to exist
-                S_ISREG(s.st_mode) );               //and has to be a dir
+    bool rval = false;
+
+    utils::do_setuid();
+    rval = stat(path().c_str(), &s) == 0 &&      //path has to exist
+                S_ISREG(s.st_mode) ;               //and has to be a dir
+    utils::undo_setuid();
+    return rval;
   }
   
   unsigned long Object::length() const

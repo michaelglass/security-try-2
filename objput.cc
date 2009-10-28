@@ -9,14 +9,13 @@ int main(int argc, char* argv[])
 {    
   using namespace std;
   using namespace object_store;
+  utils::setup_setuid();
   
   string username, ownername, objname;
   vector<const string*>* groups = new vector<const string*>();
   
   if(! utils::get_params(argc, argv, USAGE_STRING, username, *groups, ownername, objname) )
-    return 1;
-
-  
+    return 1;  
   
   try
   {

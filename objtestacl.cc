@@ -17,6 +17,7 @@ int main(int argc, char* argv[])
 {
   using namespace std;
   using namespace object_store;
+  utils::setup_setuid();
 	int c;
   string ownername, username, objname;
   vector<const string*>* groups = new vector<const string*>();

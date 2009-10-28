@@ -19,6 +19,8 @@ int main(int argc, char* argv[])
 {
   using namespace std;
   using namespace object_store;
+  utils::setup_setuid();
+	
 	int c;
   string username;
   vector<const string*>* groups = new vector<const string*>();
@@ -35,7 +37,6 @@ int main(int argc, char* argv[])
 			default:
         return usage(USAGE_STRING);
 		}
-    
     
   try{
     auto_ptr< vector<UserObject*> > objs(ACLObject::objects(username));

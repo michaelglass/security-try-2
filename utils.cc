@@ -76,9 +76,7 @@ namespace utils
       return 0;
     }
     if(get_userinfo(username, groupnames))
-    {
       return get_obj_and_owner(argc, argv, usage_string, ownername, objname, username);
-    }
     else
       return 0;
   }
@@ -102,7 +100,8 @@ namespace utils
         return 0;
       }
     }
-    ownername = username;
+    else
+      ownername = username;
     return 1;
   }
   
@@ -117,10 +116,8 @@ namespace utils
   {
     struct passwd *pwd;
     pwd = getpwuid(getuid());
-    username = pwd->pw_name;
-    char* login = getlogin();
-    if(login) //if not null, ie if success 
-      username = string(login);
+    if(pwd->pw_name)
+      username = pwd->pw_name;
     else
       return 0;
     
