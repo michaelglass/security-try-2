@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <grp.h>
+#include <pwd.h>
 namespace utils
 {
   using namespace std;
@@ -114,7 +115,9 @@ namespace utils
   
   int get_userinfo(string& username, vector<const string*>& groupnames)
   {
-    
+    struct passwd *pwd;
+    pwd = getpwuid(getuid());
+    username = pwd->pw_name;
     char* login = getlogin();
     if(login) //if not null, ie if success 
       username = string(login);
