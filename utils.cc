@@ -245,6 +245,7 @@ namespace utils
   int write_encrypted(istream& from, object_store::Object& to, unsigned char* key)
   {
     const unsigned int IV_LENGTH = 16, INBUF_LEN = 1024, OUTBUF_LEN = 1024;
+    bool fail = false;
     unsigned char iv[IV_LENGTH];
     const EVP_CIPHER *cipher = EVP_aes_128_cbc();
     EVP_CIPHER_CTX ctx;
@@ -270,53 +271,54 @@ namespace utils
     EVP_EncryptInit_ex(&ctx, cipher, NULL, key, iv);    
 
     //now lets write the encrypted version to a temp file...
-    do_setuid();
-    umask(S_IRWXG | S_IRWXO); //prevent others from reading tmp file
 
+    umask(S_IRWXG | S_IRWXO); //prevent others from reading tmp file
     char *tmpname = strdup("/tmp/tmpfileXXXXXX");
     mkstemp(tmpname);
     crypted.open(tmpname);
-    undo_setuid();
-    
     //first 16 bytes are the iv
     crypted.write((char*)iv, sizeof(unsigned char) * IV_LENGTH);
     if(crypted.bad())
-      return 3;
-    
-    while(from.good())
+      fail = true;
+
+    while(from.good() && !fail)
     {
       from.read(inbuf, INBUF_LEN);
       inlen = from.gcount();
       if(!EVP_EncryptUpdate(&ctx, (unsigned char*) outbuf, &outlen, (unsigned char*) inbuf, inlen))
       {
-        /* Error */
-        return 4;
+        fail = true;
+        break;
       }
       crypted.write(outbuf, sizeof(unsigned char) * outlen);
       if(crypted.bad()) //then write encrypted chunk...
         return 5;
     }
     
-    if(!EVP_EncryptFinal_ex(&ctx,(unsigned char*) outbuf, &outlen))
-    {
-      /* Error */
-      return 6;
-    }
-    crypted.write(outbuf, sizeof(unsigned char) * outlen); //then write encrypted chunk...
+    if(fail || !EVP_EncryptFinal_ex(&ctx,(unsigned char*) outbuf, &outlen))
+      fail = true;
+    else
+      crypted.write(outbuf, sizeof(unsigned char) * outlen); //then write encrypted chunk...
     if(crypted.bad())
-      return 7;
+      fail = true;
     
     EVP_CIPHER_CTX_cleanup(&ctx);
-    crypted.seekg(ios::beg);
-    crypted >> to;
+    if(!fail)
+    {
+      crypted.seekg(ios::beg);
+      crypted >> to;
+    }
     crypted.close();
     remove(tmpname);
-    return 0;
-    
+    if(fail)
+      return 1;
+    else
+      return 0;
   }
   
   int read_encrypted(object_store::Object& from, ostream& to, unsigned char* key)
   {
+    bool fail = false;
     const unsigned int IV_LENGTH = 16, INBUF_LEN = 1024, OUTBUF_LEN = 1024;
     unsigned char iv[IV_LENGTH];
     const EVP_CIPHER *cipher = EVP_aes_128_cbc();
@@ -327,9 +329,8 @@ namespace utils
     fstream crypted, decrypted;
     
     //write object to temp file...
-    do_setuid();
-    umask(S_IRWXG | S_IRWXO); //prevent others from reading tmp file
 
+    umask(S_IRWXG | S_IRWXO); //prevent others from reading tmp file
     char *tmpname = strdup("/tmp/tmpfileXXXXXX");
     mkstemp(tmpname);
     crypted.open(tmpname);
@@ -338,51 +339,55 @@ namespace utils
     mkstemp(tmpname2);
     decrypted.open(tmpname2);
     
-    undo_setuid();
     crypted << from;
     crypted.seekg(0, ios::beg);
     
     //read iv out of crypted
     crypted.read((char*)iv, IV_LENGTH*sizeof(unsigned char));
     if(crypted.gcount() != IV_LENGTH)
-      return 1;
-      
+      fail = true;
+    
     //now lets get the cipher ready...
     EVP_CIPHER_CTX_init(&ctx);
-    EVP_DecryptInit_ex(&ctx, cipher, NULL, key, iv);    
+    if(!fail)
+      EVP_DecryptInit_ex(&ctx, cipher, NULL, key, iv);    
 
     //now lets read the encrypted version to a decrypted file...
         
-    while(crypted.good())
+    while(!fail && crypted.good())
     {
       crypted.read(inbuf, INBUF_LEN);
       inlen = crypted.gcount();
       if(!EVP_DecryptUpdate(&ctx, (unsigned char*) outbuf, &outlen, (unsigned char*) inbuf, inlen))
       {
-        /* Error */
-        return 2;
+        fail = true;
+        break;
       }
-      decrypted.write(outbuf, sizeof(unsigned char) * outlen);
+      if(!fail)
+        decrypted.write(outbuf, sizeof(unsigned char) * outlen);
       if(decrypted.bad()) //then write encrypted chunk...
-        return 3;
+        fail = true;
     }
-    crypted.close();
-    remove(tmpname);
-    if(!EVP_DecryptFinal_ex(&ctx,(unsigned char*) outbuf, &outlen))
-    {
-      /* Error */
-      return 4;
-    }
-    decrypted.write(outbuf, sizeof(unsigned char) * outlen); //then write encrypted chunk...
+    if(fail || !EVP_DecryptFinal_ex(&ctx,(unsigned char*) outbuf, &outlen))
+      fail = true;
+    else
+      decrypted.write(outbuf, sizeof(unsigned char) * outlen); //then write encrypted chunk...
     if(decrypted.bad())
-      return 5;
+      fail = true;
     
     EVP_CIPHER_CTX_cleanup(&ctx);
-    decrypted.seekp(0, ios::beg);
-
-    to << decrypted.rdbuf();
+    if(!fail)
+    {
+      decrypted.seekp(0, ios::beg);
+      to << decrypted.rdbuf();
+    }
     decrypted.close();
     remove(tmpname2);
-    return 0;
+    crypted.close();
+    remove(tmpname);
+    if(fail)
+      return 1;
+    else
+      return 0;
   }  
 }
