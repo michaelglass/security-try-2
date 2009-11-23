@@ -3,6 +3,8 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
+#include "object.h"
 
 namespace utils
 {
@@ -24,9 +26,10 @@ namespace utils
 
   // same thing, doesnt split objname
   int get_params(int argc, char **, const string& usage_string, string& username, string& groupname, string& objname);
-  
+  //vector of groups instead of one groupname
   int get_params(int argc, char* argv[], const string& usage_string, string& username, vector<const string*>& groupnames, string& ownername, string& objname);
-  
+  //and a keyphrase
+  int get_params(int argc, char* argv[], const string& usage_string, string& username, vector<const string*>& groupnames, string& ownername, string& objname, string& key);
   
   int get_obj_and_owner(int argc, char*argv[], const string& usage_string, string& ownername, string& objname, string& username);
 
@@ -62,6 +65,17 @@ namespace utils
 /* Set the effective UID to the real UID. */
 
   void undo_setuid (void);
+  
+  /** 
+  hashes the input string.  unpredictable behavior with input > 255 chars.
+  @param string* input the input string
+  @param unsigned char* output the output char*
+  @param unsigned int* length the output int*'s length
+  */
+  void md5(string* input, unsigned char* output, unsigned int* length);
+  
+  int write_encrypted(istream& from, object_store::Object& to, unsigned char* key);
+  int read_encrypted(object_store::Object& from, ostream& to, unsigned char* key);
 }
 
 

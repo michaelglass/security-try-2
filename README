@@ -1,7 +1,7 @@
 Michael Glass
 mgg2102
 
-Assignment 2
+Assignment 3
 
 this code compiles to six binaries:
 
@@ -15,8 +15,8 @@ objtestacl
 the permissions make target sets the permissions on all of the binaries and on the repository.
 the reset_repo make target resets the data in the repository and sets up the permissions
 
-obj* are all documented in their usages and in the pgm0.txt and pgm1.txt.
+obj* are all documented in their usages and in the pgm0.txt and pgm1.txt and pgm2.txt.
 
-This assignment was much less clean and more quickly done than assignments 0 and 1.  A lot of the design decisions came down to what could be done the quickest, and so a lot of unstructured patch-and-fix code was added to the code from assignment 1 which I was satisfied with.  Furthermore, unit testing across accounts is something I didn't not learn how to do:  all testing has been use testing.
+In my last assignment I said that I a lot of the code was messy.  This assignment didn't fix any of that, but didn't make anything worse.  All hashing and encryption were done in three patch functions in the utils namespace (md5, read_encrypted, write_encrypted) and then implemented in a few lines in objget and objput.
 
-The entire program runs suid'd to a user (not root), and the files are stored in a repository owned by the binary owner whose file permissions are 700.  Any other users can't break through the 700-permission'd directory except by using the accessor applications.
+I have a few tests to test writing with and without a passphrase.  I haven't gone back to fix my test suite though.

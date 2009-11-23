@@ -1,3 +1,4 @@
+#include <openssl/evp.h>
 #include "utils.h"
 #include <getopt.h>
 #include <ctype.h>
@@ -5,7 +6,9 @@
 #include <stdlib.h>
 #include <sstream> //int to string conversion
 #include <iostream>
+#include <fstream>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <grp.h>
 #include <pwd.h>
@@ -69,17 +72,47 @@ namespace utils
     
   }
   
-  int get_params(int argc, char* argv[], const string& usage_string, string& username, vector<const string*>& groupnames, string& ownername, string& objname)
+  int get_params(int argc, char* argv[], const string& usage_string, string& username, vector<const string*>& groupnames, string& ownername, string& objname, string& key)
   {
-    if(argc < 2)
+    if(argc != 2 && argc != 4)
     {
       cerr << usage_string;
       return 0;
     }
+    if(argc == 2)
+    {
+      key = "";
+    }
+    else
+    {
+      char key_char = argv[1][0];
+      if(key_char == 'k' || 'K')
+        key = string(argv[2]);
+      else
+      {
+        cerr << usage_string;
+        return 0;
+      } 
+    }
+    
     if(get_userinfo(username, groupnames))
       return get_obj_and_owner(argc, argv, usage_string, ownername, objname, username);
     else
       return 0;
+  }
+  
+  int get_params(int argc, char* argv[], const string& usage_string, string& username, vector<const string*>& groupnames, string& ownername, string& objname)
+  {
+    string key;
+    int rval = get_params(argc, argv, usage_string, username, groupnames, ownername, objname, key);
+    if(key == "" && rval)
+      return rval;
+    else
+    {
+      cerr << usage_string;
+      return 0;
+    }
+      
   }
     
   int get_obj_and_owner(int argc, char*argv[], const string& usage_string, string& ownername, string& objname, string& username)
@@ -201,6 +234,155 @@ namespace utils
         }
     }
   }
+  void md5(string* input, unsigned char* output, unsigned int* length)
+  {
+    EVP_MD_CTX md5_me;
+    EVP_DigestInit(&md5_me, EVP_md5());
+    EVP_DigestUpdate(&md5_me, input->c_str(), input->length());
+    EVP_DigestFinal(&md5_me, output, length);
+  }
   
+  int write_encrypted(istream& from, object_store::Object& to, unsigned char* key)
+  {
+    const unsigned int IV_LENGTH = 16, INBUF_LEN = 1024, OUTBUF_LEN = 1024;
+    unsigned char iv[IV_LENGTH];
+    const EVP_CIPHER *cipher = EVP_aes_128_cbc();
+    EVP_CIPHER_CTX ctx;
+    char inbuf[INBUF_LEN], outbuf[OUTBUF_LEN];
+    int inlen, outlen;
+    ifstream urandom;
+    fstream crypted;
+    
+    //gen random iv
+    urandom.open("/dev/urandom");
+    if (urandom.good()) {
+      urandom.read((char*)iv, IV_LENGTH * sizeof(unsigned char));
+      int read = urandom.gcount();
+      urandom.close();
+      if(read != IV_LENGTH)
+        return 2;
+    } 
+    else
+      return 1;
+
+    //now lets get the cipher ready...
+    EVP_CIPHER_CTX_init(&ctx);
+    EVP_EncryptInit_ex(&ctx, cipher, NULL, key, iv);    
+
+    //now lets write the encrypted version to a temp file...
+    do_setuid();
+    umask(S_IRWXG | S_IRWXO); //prevent others from reading tmp file
+
+    char *tmpname = strdup("/tmp/tmpfileXXXXXX");
+    mkstemp(tmpname);
+    crypted.open(tmpname);
+    undo_setuid();
+    
+    //first 16 bytes are the iv
+    crypted.write((char*)iv, sizeof(unsigned char) * IV_LENGTH);
+    if(crypted.bad())
+      return 3;
+    
+    while(from.good())
+    {
+      from.read(inbuf, INBUF_LEN);
+      inlen = from.gcount();
+      if(!EVP_EncryptUpdate(&ctx, (unsigned char*) outbuf, &outlen, (unsigned char*) inbuf, inlen))
+      {
+        /* Error */
+        return 4;
+      }
+      crypted.write(outbuf, sizeof(unsigned char) * outlen);
+      if(crypted.bad()) //then write encrypted chunk...
+        return 5;
+    }
+    
+    if(!EVP_EncryptFinal_ex(&ctx,(unsigned char*) outbuf, &outlen))
+    {
+      /* Error */
+      return 6;
+    }
+    crypted.write(outbuf, sizeof(unsigned char) * outlen); //then write encrypted chunk...
+    if(crypted.bad())
+      return 7;
+    
+    EVP_CIPHER_CTX_cleanup(&ctx);
+    crypted.seekg(ios::beg);
+    crypted >> to;
+    crypted.close();
+    // remove(tmpname);
+    return 0;
+    
+  }
   
+  int read_encrypted(object_store::Object& from, ostream& to, unsigned char* key)
+  {
+    const unsigned int IV_LENGTH = 16, INBUF_LEN = 1024, OUTBUF_LEN = 1024;
+    unsigned char iv[IV_LENGTH];
+    const EVP_CIPHER *cipher = EVP_aes_128_cbc();
+    EVP_CIPHER_CTX ctx;
+    char inbuf[INBUF_LEN], outbuf[OUTBUF_LEN];
+    int inlen, outlen;
+    ifstream urandom;
+    fstream crypted, decrypted;
+    
+    //write object to temp file...
+    do_setuid();
+    umask(S_IRWXG | S_IRWXO); //prevent others from reading tmp file
+
+    char *tmpname = strdup("/tmp/tmpfileXXXXXX");
+    mkstemp(tmpname);
+    crypted.open(tmpname);
+    
+    char *tmpname2 = strdup("/tmp/tmpfileXXXXXX");
+    mkstemp(tmpname2);
+    decrypted.open(tmpname2);
+    
+    undo_setuid();
+    crypted << from;
+    crypted.seekg(0, ios::beg);
+    
+    //read iv out of crypted
+    crypted.read((char*)iv, IV_LENGTH*sizeof(unsigned char));
+    if(crypted.gcount() != IV_LENGTH)
+      return 1;
+      
+    //now lets get the cipher ready...
+    EVP_CIPHER_CTX_init(&ctx);
+    EVP_DecryptInit_ex(&ctx, cipher, NULL, key, iv);    
+
+    //now lets read the encrypted version to a decrypted file...
+        
+    while(crypted.good())
+    {
+      crypted.read(inbuf, INBUF_LEN);
+      inlen = crypted.gcount();
+      if(!EVP_DecryptUpdate(&ctx, (unsigned char*) outbuf, &outlen, (unsigned char*) inbuf, inlen))
+      {
+        /* Error */
+        return 2;
+      }
+      decrypted.write(outbuf, sizeof(unsigned char) * outlen);
+      if(decrypted.bad()) //then write encrypted chunk...
+        return 3;
+    }
+    crypted.close();
+    // remove(tmpname);
+    if(!EVP_DecryptFinal_ex(&ctx,(unsigned char*) outbuf, &outlen))
+    {
+      /* Error */
+      return 4;
+    }
+    decrypted.write(outbuf, sizeof(unsigned char) * outlen); //then write encrypted chunk...
+    if(decrypted.bad())
+      return 5;
+    
+    EVP_CIPHER_CTX_cleanup(&ctx);
+    decrypted.seekp(0, ios::beg);
+
+    to << decrypted.rdbuf();
+    decrypted.close();
+    // remove(tmpname2);
+    return 0;
+  }  
 }

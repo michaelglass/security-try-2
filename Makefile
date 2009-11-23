@@ -1,46 +1,40 @@
-CC=			gcc
 CXX=		g++
-CFLAGS=		#-g -Wall -O2 -m64
-CXXFLAGS=	$(CFLAGS)
-DFLAGS=		
+CXXFLAGS=
+LFLAGS= -lssl -lcrypto
 OBJS=	 object.o user.o userobject.o permissionsobject.o acl.o aclobject.o utils.o
-PROGS=		objput objget objput objgetacl objsetacl objtestacl objlist #objsetuserobj tests  
-INCLUDES=	
+PROGS= objput objget objput objgetacl objsetacl objtestacl objlist #objsetuserobj tests
 LIBS=
 
-.SUFFIXES:.cc .c .o
+.SUFFIXES:.cc .o
 
-.c.o:
-		$(CC) -c $(CFLAGS) $(DFLAGS) $(INCLUDES) $< -o $@
 .cc.o:
-		$(CXX) -c $(CXXFLAGS) $(DFLAGS) $(INCLUDES) $< -o $@
-
+		$(CXX) -c $(CXXFLAGS) $< -o $@
 #first is default
 build:$(PROGS)
 
-tests: $(OBJS) tests.o
-	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) tests.o -o $@ $(LIBS)
+tests:$(OBJS) tests.o
+	$(CXX) $(CXXFLAGS) $(LFLAGS) $(OBJS) tests.o -o $@ $(LIBS)
 
-objget: $(OBJS) objget.o
-	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) objget.o -o $@ $(LIBS)
+objget:$(OBJS) objget.o
+	$(CXX) $(CXXFLAGS) $(LFLAGS) $(OBJS) objget.o -o $@ $(LIBS)
 
-objput: $(OBJS) objput.o
-	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) objput.o -o $@ $(LIBS)
+objput:$(OBJS) objput.o
+	$(CXX) $(CXXFLAGS) $(LFLAGS) $(OBJS) objput.o -o $@ $(LIBS)
 
-objgetacl: $(OBJS) objgetacl.o
-	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) objgetacl.o -o $@ $(LIBS)
+objgetacl:$(OBJS) objgetacl.o
+	$(CXX) $(CXXFLAGS) $(LFLAGS) $(OBJS) objgetacl.o -o $@ $(LIBS)
 
-objsetacl: $(OBJS) objsetacl.o
-	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) objsetacl.o -o $@ $(LIBS)
+objsetacl:$(OBJS) objsetacl.o
+	$(CXX) $(CXXFLAGS) $(LFLAGS) $(OBJS) objsetacl.o -o $@ $(LIBS)
 
-objtestacl: $(OBJS) objtestacl.o
-	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) objtestacl.o -o $@ $(LIBS)
+objtestacl:$(OBJS) objtestacl.o
+	$(CXX) $(CXXFLAGS) $(LFLAGS) $(OBJS) objtestacl.o -o $@ $(LIBS)
 
-objlist: $(OBJS) objlist.o
-	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) objlist.o -o $@ $(LIBS)
+objlist:$(OBJS) objlist.o
+	$(CXX) $(CXXFLAGS) $(LFLAGS) $(OBJS) objlist.o -o $@ $(LIBS)
 
-objsetuserobj: $(OBJS) objsetuserobj.o
-	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) objsetuserobj.o -o $@ $(LIBS)
+objsetuserobj:$(OBJS) objsetuserobj.o
+	$(CXX) $(CXXFLAGS) $(LFLAGS) $(OBJS) objsetuserobj.o -o $@ $(LIBS)
 
 test: build
 	@echo "-running unit tests and initializing user database-"
@@ -96,6 +90,13 @@ test: build
 	# ./objgetacl -g group3 -u elena michael+newfile
 	# @echo "------------"
 	# @echo "-so I don't know how to test failing cases in make so I'm going to leave that up to you!  enjoy!"
+	echo "yo dawg!" | ./objput -k passphrase dawg
+	./objget -k passphrase dawg
+	./objget -k wrong dawg
+	./objget dawg
+	echo "yo dawg!" | ./objput dawg
+	./objget dawg
+	./objget -k wrong dawg
 
 permissions: build
 	@echo "-setting permissions on applications and repository-"
