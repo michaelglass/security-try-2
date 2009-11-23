@@ -310,7 +310,7 @@ namespace utils
     crypted.seekg(ios::beg);
     crypted >> to;
     crypted.close();
-    // remove(tmpname);
+    remove(tmpname);
     return 0;
     
   }
@@ -367,7 +367,7 @@ namespace utils
         return 3;
     }
     crypted.close();
-    // remove(tmpname);
+    remove(tmpname);
     if(!EVP_DecryptFinal_ex(&ctx,(unsigned char*) outbuf, &outlen))
     {
       /* Error */
@@ -382,7 +382,7 @@ namespace utils
 
     to << decrypted.rdbuf();
     decrypted.close();
-    // remove(tmpname2);
+    remove(tmpname2);
     return 0;
   }  
 }
