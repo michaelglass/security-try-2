@@ -155,14 +155,10 @@ namespace utils
     else
       return 0;
     
-    gid_t *groups;
     int ngroups;
-    long ngroups_max;
+    long ngroups_max = sysconf(_SC_NGROUPS_MAX) + 1;
+    gid_t groups[ngroups_max];
     
-    ngroups_max = sysconf(_SC_NGROUPS_MAX) + 1;
-    
-    groups = (gid_t *)malloc(ngroups_max *sizeof(gid_t));
-
 
     ngroups = getgroups(ngroups_max, groups);
     

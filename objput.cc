@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
   
   string username, ownername, objname, key;
   vector<const string*>* groups = new vector<const string*>();
-  unsigned char* hash = (unsigned char*) malloc(16);
+  unsigned char hash[16];
   unsigned int md5_len;
   bool use_key;
 

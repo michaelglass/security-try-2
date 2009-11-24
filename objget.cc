@@ -14,8 +14,8 @@ int main(int argc, char* argv[])
   utils::setup_setuid();
 
   string ownername, username, objname, key;
-  vector<const string*>* groups = new vector<const string*>();
-  unsigned char* hash = (unsigned char*) malloc(16);
+  vector<const string*>* groups = new vector<const string*>(); //aclobject takes care of de-allocating
+  unsigned char hash[16];
   unsigned int md5_len;
   bool use_key;
     
